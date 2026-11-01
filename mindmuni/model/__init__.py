@@ -1,4 +1,4 @@
-from mindmuni.model.geometry import Point
+from mindmuni.model.geometry import Point, Size
 from mindmuni.model.mind_map import MindMap
 from mindmuni.model.node import Node
 from mindmuni.model.node_style import NodeColor, NodeShape, NodeStyle
@@ -15,6 +15,7 @@ __all__ = [
     "NodeStyle",
     "NoteDocument",
     "Point",
+    "Size",
     "TextBlock",
     "TextSpan",
     "Theme",

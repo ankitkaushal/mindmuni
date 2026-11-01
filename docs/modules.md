@@ -9,6 +9,7 @@ editor), **utils**, **file**, **model** and **core**. Classes are described in
 ```
 MindMuni/
 ├── main.py                         # Entry point: builds the app and runs mainloop
+├── map_preview.py                  # Standalone mapping-component preview (hard-coded map file)
 ├── themes/                         # Built-in theme JSON files
 │   ├── dark.json
 │   └── light.json
