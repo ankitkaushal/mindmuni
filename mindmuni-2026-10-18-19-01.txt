@@ -1,0 +1,52 @@
+Page 1
+Mind Muni
+This is specification for a GUI based mind mapping tool called Mind muni
+The basic features of the tool are following
+1. GUI to create the
+map-Mapping Main Component
+2. Tent component for each node which is a basic tent editor that lets us write quick notes for each mapping mode.
+•-Node Tent Component Mapping Mainlomponent Specs
+
+Page 2
+1. New map will start with
+a root node
+2. Shortcut keys and buttons to add child node on any node
+3 Multiple configurable shapes and colors( 10-12 main colors) for each node an GUI
+4. short wit key and button to navigate to Text area of node.
+Node Tent Component
+1. Basic tent editor with hi 42 heading Types and a
+
+Page 3
+bold and highlight option
+2. Back button to navigate back
+to the mapping component
+Menu bar
+The main menu bar will be there for all sub component UIs
+it will have following options
+File → New
+Saxe
+save as
+open
+Thome → Dark
+light custom
+
+Page 4
+Files
+1. Map files will write everything in a json file in root directory
+2- Thome file is a json file to pick colors and style properties
+Code
+1 Use python 3:12.
+2 Tinker base GUI
+3. follow clean code principles
+-Small functions and one function per abstraction level
+4 Meaningful variable and
+function names
+5. Use Object oriented programming
+
+Page 5
+6. Break classes and modules to following
+Ui-Mapping main, Tent editor utils
+↳ Ui
+↳ file
+model
+core
