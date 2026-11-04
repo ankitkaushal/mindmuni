@@ -36,13 +36,22 @@ def node_tag(node_id: str) -> str:
 
 
 class NodeRenderer:
-    """Measures and draws a single node: its shape, title and collapsed-children badge."""
+    """Measures and draws a single node: its shape, title and collapsed-children badge.
 
-    def __init__(self, canvas: tk.Canvas, theme: Theme) -> None:
+    measure() works in map units (zoom 1), so the layout and the saved positions never depend on the zoom.
+    draw() scales positions, sizes and fonts by the zoom, so the canvas shows map point p at p * zoom.
+    """
+
+    def __init__(self, canvas: tk.Canvas, theme: Theme, zoom: float = 1.0) -> None:
         self._canvas = canvas
         self._palette = theme.palette
-        self._font = tkfont.Font(root=canvas, family=theme.fonts.family, size=theme.fonts.node_title_size)
-        self._badge_font = tkfont.Font(root=canvas, family=theme.fonts.family, size=max(theme.fonts.node_title_size - 3, 7))
+        self._zoom = zoom
+        title_size = theme.fonts.node_title_size
+        badge_size = max(title_size - 3, 7)
+        self._font = tkfont.Font(root=canvas, family=theme.fonts.family, size=title_size)
+        # Rounded down so the zoomed text never outgrows its zoomed box.
+        self._drawn_font = tkfont.Font(root=canvas, family=theme.fonts.family, size=max(int(title_size * zoom), 1))
+        self._badge_font = tkfont.Font(root=canvas, family=theme.fonts.family, size=max(int(badge_size * zoom), 1))
 
     def measure(self, node: Node) -> Size:
         text_size = self._measure_title(node.title)
@@ -68,16 +77,18 @@ class NodeRenderer:
 
     def _draw_shape(self, node: Node, fill_color: str, tags: tuple[str, ...]) -> None:
         size = self.measure(node)
-        center_x, center_y = node.position.x, node.position.y
-        half_width, half_height = size.width / 2, size.height / 2
-        style = {"fill": fill_color, "outline": darken(fill_color, OUTLINE_DARKEN_FRACTION), "width": OUTLINE_WIDTH, "tags": tags}
+        zoom = self._zoom
+        center_x, center_y = node.position.x * zoom, node.position.y * zoom
+        half_width, half_height = size.width * zoom / 2, size.height * zoom / 2
+        outline = darken(fill_color, OUTLINE_DARKEN_FRACTION)
+        style = {"fill": fill_color, "outline": outline, "width": self._line_width(), "tags": tags}
         match node.style.shape:
             case NodeShape.RECTANGLE:
                 self._canvas.create_rectangle(*shape_geometry.bounding_box(center_x, center_y, half_width, half_height), **style)
             case NodeShape.ELLIPSE:
                 self._canvas.create_oval(*shape_geometry.bounding_box(center_x, center_y, half_width, half_height), **style)
             case NodeShape.ROUNDED_RECTANGLE:
-                points = shape_geometry.rounded_rectangle(center_x, center_y, half_width, half_height, CORNER_RADIUS)
+                points = shape_geometry.rounded_rectangle(center_x, center_y, half_width, half_height, CORNER_RADIUS * zoom)
                 self._canvas.create_polygon(points, smooth=True, **style)
             case NodeShape.DIAMOND:
                 self._canvas.create_polygon(shape_geometry.diamond(center_x, center_y, half_width, half_height), **style)
@@ -88,26 +99,31 @@ class NodeRenderer:
 
     def _draw_title(self, node: Node, fill_color: str, tags: tuple[str, ...]) -> None:
         self._canvas.create_text(
-            node.position.x,
-            node.position.y,
+            node.position.x * self._zoom,
+            node.position.y * self._zoom,
             text=node.title,
-            font=self._font,
+            font=self._drawn_font,
             fill=contrast_text_color(fill_color),
             justify="center",
             tags=tags,
         )
 
     def _draw_collapsed_badge(self, node: Node, grows_left: bool, tags: tuple[str, ...]) -> None:
+        zoom = self._zoom
         direction = -1 if grows_left else 1
-        badge_x = node.position.x + direction * self.measure(node).width / 2
-        badge_y = node.position.y
+        badge_x = (node.position.x + direction * self.measure(node).width / 2) * zoom
+        badge_y = node.position.y * zoom
+        radius = BADGE_RADIUS * zoom
         self._canvas.create_oval(
-            *shape_geometry.bounding_box(badge_x, badge_y, BADGE_RADIUS, BADGE_RADIUS),
+            *shape_geometry.bounding_box(badge_x, badge_y, radius, radius),
             fill=self._palette.background,
             outline=self._palette.connector_line,
-            width=OUTLINE_WIDTH,
+            width=self._line_width(),
             tags=tags,
         )
         self._canvas.create_text(
             badge_x, badge_y, text=str(len(node.children)), font=self._badge_font, fill=self._palette.foreground, tags=tags
         )
+
+    def _line_width(self) -> float:
+        return max(OUTLINE_WIDTH * self._zoom, 1.0)

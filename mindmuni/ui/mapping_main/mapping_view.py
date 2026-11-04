@@ -34,6 +34,19 @@ class MappingView(View):
         self._redraw()
         self.after_idle(lambda: self._canvas.center_on(self._mind_map.root.position))
 
+    def zoom_in(self) -> None:
+        self._canvas.zoom_in()
+
+    def zoom_out(self) -> None:
+        self._canvas.zoom_out()
+
+    def reset_zoom(self) -> None:
+        self._canvas.reset_zoom()
+
+    @property
+    def zoom(self) -> float:
+        return self._canvas.zoom
+
     def apply_theme(self, theme: Theme) -> None:
         self._canvas.apply_theme(theme)
         self._redraw()  # fonts may change, so node sizes and layout change too

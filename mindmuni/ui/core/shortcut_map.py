@@ -20,6 +20,9 @@ class ShortcutMap:
     SAVE_MAP_AS = Shortcut(("<Control-S>", "<Control-Shift-s>"), "Ctrl+Shift+S")
     QUIT = Shortcut(("<Control-q>",), "Ctrl+Q")
     NAVIGATE_BACK = Shortcut(("<Escape>",), "Esc")
+    ZOOM_IN = Shortcut(("<Control-plus>", "<Control-equal>", "<Control-KP_Add>"), "Ctrl++")
+    ZOOM_OUT = Shortcut(("<Control-minus>", "<Control-KP_Subtract>"), "Ctrl+-")
+    RESET_ZOOM = Shortcut(("<Control-0>", "<Control-KP_0>"), "Ctrl+0")
 
     @staticmethod
     def bind_global(root: tk.Tk, shortcut: Shortcut, action: Callable[[], None]) -> None:

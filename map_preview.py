@@ -1,8 +1,9 @@
 """Standalone preview of the mapping component, without the main window or menu bar.
 
 Loads the hard-coded map file below and draws it.
-Keys: T toggles light/dark theme, L toggles right/balanced layout, R reloads the file from disk.
-Mouse: drag to pan, wheel to scroll (Shift+wheel scrolls sideways).
+Keys: T toggles light/dark theme, L toggles right/balanced layout, R reloads the file from disk,
+Ctrl+plus / Ctrl+minus zoom in and out, Ctrl+0 resets the zoom.
+Mouse: drag to pan, wheel to scroll (Shift+wheel scrolls sideways, Ctrl+wheel zooms around the pointer).
 """
 
 import tkinter as tk
@@ -13,6 +14,7 @@ from mindmuni.file.map_repository import MapRepository
 from mindmuni.file.map_serializer import MapSerializer
 from mindmuni.model.map_style import MapLayout
 from mindmuni.model.mind_map import MindMap
+from mindmuni.ui.core.shortcut_map import ShortcutMap
 from mindmuni.ui.mapping_main.mapping_view import MappingView
 from mindmuni.utils.paths import maps_dir
 
@@ -44,6 +46,9 @@ class MapPreview:
         self._root.bind("<KeyPress-t>", lambda _event: self._toggle_theme())
         self._root.bind("<KeyPress-l>", lambda _event: self._toggle_layout())
         self._root.bind("<KeyPress-r>", lambda _event: self._reload_map())
+        ShortcutMap.bind_local(self._root, ShortcutMap.ZOOM_IN, self._view.zoom_in)
+        ShortcutMap.bind_local(self._root, ShortcutMap.ZOOM_OUT, self._view.zoom_out)
+        ShortcutMap.bind_local(self._root, ShortcutMap.RESET_ZOOM, self._view.reset_zoom)
 
     def _reload_map(self) -> None:
         mind_map = self._repository.load(MAP_FILE)

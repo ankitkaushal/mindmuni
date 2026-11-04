@@ -40,6 +40,12 @@ To preview a different map, put it in `maps/` and change this line.
 | Left-drag | Pan the canvas |
 | Mouse wheel | Scroll up and down |
 | Shift + wheel | Scroll sideways |
+| Ctrl + wheel | Zoom in or out around the mouse pointer |
+| `Ctrl` + `+` / `Ctrl` + `-` | Zoom in / out around the middle of the window |
+| `Ctrl` + `0` | Reset the zoom to 100% |
+
+Zoom goes from 25% to 300%, 1.2× per step. It only changes how the map is
+drawn: node positions, the layout and the saved file are not affected.
 
 ### When something goes wrong
 | Symptom | Cause |
@@ -100,7 +106,7 @@ node and a rich-text note, so it's a good file to copy from.
 ### Preview script and sample data
 | File | Contains |
 |------|----------|
-| `map_preview.py` | `MapPreview` creates a bare `tk.Tk` window, puts a `MappingView` in it, loads `MAP_FILE` through `MapRepository`, and binds `T` (theme) and `R` (reload). It's a test harness only; the real app will use `MainWindow` and `ViewNavigator` instead. |
+| `map_preview.py` | `MapPreview` creates a bare `tk.Tk` window, puts a `MappingView` in it, loads `MAP_FILE` through `MapRepository`, and binds `T` (theme), `L` (layout), `R` (reload) and the zoom shortcuts. It's a test harness only; the real app will use `MainWindow` and `ViewNavigator` instead. |
 | `maps/sample.mson` | The sample map the preview loads. |
 
 ### `mindmuni/file/`: persistence
@@ -119,9 +125,9 @@ node and a rich-text note, so it's a good file to copy from.
 ### `mindmuni/ui/mapping_main/`: the mapping component (Tkinter)
 | File | Contains |
 |------|----------|
-| `mapping_view.py` | `MappingView` is a `View` subclass and the component's public entry point. `show_map(map)` runs the layout, draws the map and centres the view on the root. `set_layout(layout)` changes the map's `style.layout` and redraws. `apply_theme(theme)` restyles and redraws, and re-runs the layout because font sizes can change. It wraps the canvas with scrollbars. |
-| `map_canvas.py` | `MapCanvas` is a `tk.Canvas`. `apply_theme()` builds the renderers for the theme, `measure_node()` is passed to `TreeLayout`, `draw_map()` draws connectors first and nodes on top, and `center_on(point)` scrolls to a point. It also handles drag-to-pan and wheel scrolling (Linux uses `Button-4/5`, Windows and macOS use `MouseWheel`). |
-| `node_renderer.py` | `NodeRenderer.measure(node)` sizes a node from its title text. `SHAPE_SCALE` makes the box bigger for shapes such as diamonds, ellipses and clouds so the text still fits inside. `draw(node, grows_left)` draws the shape, the title (in dark or light text for contrast) and the collapsed-children badge, which sits on the side the node's children grow towards. Every item it draws is tagged `"node"` and `node_tag(node_id)` (= `"node:<id>"`), ready for click selection later. |
+| `mapping_view.py` | `MappingView` is a `View` subclass and the component's public entry point. `show_map(map)` runs the layout, draws the map and centres the view on the root. `set_layout(layout)` changes the map's `style.layout` and redraws. `zoom_in()`, `zoom_out()`, `reset_zoom()` and the `zoom` property pass through to the canvas. `apply_theme(theme)` restyles and redraws, and re-runs the layout because font sizes can change. It wraps the canvas with scrollbars. |
+| `map_canvas.py` | `MapCanvas` is a `tk.Canvas`. `apply_theme()` builds the renderers for the theme, `measure_node()` is passed to `TreeLayout`, `draw_map()` draws connectors first and nodes on top, and `center_on(point)` scrolls to a point. It also handles drag-to-pan, wheel scrolling (Linux uses `Button-4/5`, Windows and macOS use `MouseWheel`) and zoom. Zoom is a view-only transform: node positions stay in map units and the canvas draws map point `p` at `p * zoom`, so zooming redraws without re-running the layout. `set_zoom(zoom, anchor_x, anchor_y)` clamps the zoom to `MIN_ZOOM`..`MAX_ZOOM` and keeps the map point under the anchor (the mouse pointer for Ctrl+wheel, otherwise the middle of the window) in place. |
+| `node_renderer.py` | `NodeRenderer.measure(node)` sizes a node from its title text, in map units (zoom 1). `draw()` scales positions, sizes, line widths and fonts by the renderer's zoom; the zoomed font size is rounded down so the text always fits its box. `SHAPE_SCALE` makes the box bigger for shapes such as diamonds, ellipses and clouds so the text still fits inside. `draw(node, grows_left)` draws the shape, the title (in dark or light text for contrast) and the collapsed-children badge, which sits on the side the node's children grow towards. Every item it draws is tagged `"node"` and `node_tag(node_id)` (= `"node:<id>"`), ready for click selection later. |
 | `connector_renderer.py` | `ConnectorRenderer.draw(parent, parent_size, child, child_size)` draws a smooth curve, tagged `"connector"`, from the parent's right edge to the child's left edge, or the other way round when the child is to the parent's left. |
 | `__init__.py` | Re-exports `MappingView`, `MapCanvas` and `MAP_VIEW_ID`. |
 
