@@ -51,13 +51,14 @@ class NodeRenderer:
         width_scale, height_scale = SHAPE_SCALE[node.style.shape]
         return Size(base_width * width_scale, base_height * height_scale)
 
-    def draw(self, node: Node) -> None:
+    def draw(self, node: Node, grows_left: bool = False) -> None:
+        """grows_left: the node's children are drawn to its left, so the collapsed badge goes on that side."""
         fill_color = self._palette.color_for(node.style.color)
         tags = (NODE_TAG, node_tag(node.node_id))
         self._draw_shape(node, fill_color, tags)
         self._draw_title(node, fill_color, tags)
         if node.collapsed and node.children:
-            self._draw_collapsed_badge(node, tags)
+            self._draw_collapsed_badge(node, grows_left, tags)
 
     def _measure_title(self, title: str) -> Size:
         lines = title.splitlines() or [""]
@@ -96,8 +97,9 @@ class NodeRenderer:
             tags=tags,
         )
 
-    def _draw_collapsed_badge(self, node: Node, tags: tuple[str, ...]) -> None:
-        badge_x = node.position.x + self.measure(node).width / 2
+    def _draw_collapsed_badge(self, node: Node, grows_left: bool, tags: tuple[str, ...]) -> None:
+        direction = -1 if grows_left else 1
+        badge_x = node.position.x + direction * self.measure(node).width / 2
         badge_y = node.position.y
         self._canvas.create_oval(
             *shape_geometry.bounding_box(badge_x, badge_y, BADGE_RADIUS, BADGE_RADIUS),

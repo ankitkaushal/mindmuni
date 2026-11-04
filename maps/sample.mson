@@ -1,0 +1,166 @@
+[
+  {
+    "format_version": 1,
+    "map_id": "sample-map",
+    "title": "Mind Muni",
+    "created_at": "2026-11-01T10:00:00",
+    "updated_at": "2026-11-01T10:00:00",
+    "root": {
+      "node_id": "root",
+      "title": "Mind Muni",
+      "children": [
+        {
+          "node_id": "mapping",
+          "title": "Mapping UI",
+          "children": [
+            {
+              "node_id": "canvas",
+              "title": "Canvas"
+            },
+            {
+              "node_id": "shapes",
+              "title": "Node shapes",
+              "children": [
+                {
+                  "node_id": "shape-diamond",
+                  "title": "Diamond"
+                },
+                {
+                  "node_id": "shape-cloud",
+                  "title": "Cloud"
+                },
+                {
+                  "node_id": "shape-ellipse",
+                  "title": "Ellipse"
+                }
+              ]
+            },
+            {
+              "node_id": "shortcuts",
+              "title": "Keyboard\nshortcuts"
+            }
+          ]
+        },
+        {
+          "node_id": "editor",
+          "title": "Text editor",
+          "children": [
+            {
+              "node_id": "headings",
+              "title": "H1 / H2 headings"
+            },
+            {
+              "node_id": "bold",
+              "title": "Bold & highlight"
+            }
+          ]
+        },
+        {
+          "node_id": "files",
+          "title": "Files",
+          "children": [
+            {
+              "node_id": "map-json",
+              "title": "Map JSON"
+            },
+            {
+              "node_id": "theme-json",
+              "title": "Theme JSON"
+            }
+          ]
+        },
+        {
+          "node_id": "themes",
+          "title": "Themes"
+        }
+      ]
+    }
+  },
+  {
+    "map": {
+      "layout": "BALANCED"
+    },
+    "nodes": {
+      "root": {
+        "shape": "ELLIPSE",
+        "color": "BLUE"
+      },
+      "mapping": {
+        "shape": "ROUNDED_RECTANGLE",
+        "color": "GREEN"
+      },
+      "canvas": {
+        "shape": "RECTANGLE",
+        "color": "LIME"
+      },
+      "shapes": {
+        "shape": "HEXAGON",
+        "color": "TEAL"
+      },
+      "shape-diamond": {
+        "shape": "DIAMOND",
+        "color": "CYAN"
+      },
+      "shape-cloud": {
+        "shape": "CLOUD",
+        "color": "INDIGO"
+      },
+      "shape-ellipse": {
+        "shape": "ELLIPSE",
+        "color": "PURPLE"
+      },
+      "shortcuts": {
+        "shape": "ROUNDED_RECTANGLE",
+        "color": "GREEN"
+      },
+      "editor": {
+        "shape": "ROUNDED_RECTANGLE",
+        "color": "ORANGE"
+      },
+      "headings": {
+        "color": "AMBER"
+      },
+      "bold": {
+        "color": "YELLOW"
+      },
+      "files": {
+        "shape": "RECTANGLE",
+        "color": "RED",
+        "collapsed": true
+      },
+      "themes": {
+        "shape": "CLOUD",
+        "color": "PINK"
+      }
+    }
+  },
+  {
+    "notes": {
+      "root": {
+        "blocks": [
+          {
+            "block_type": "HEADING_1",
+            "spans": [
+              {
+                "text": "Mind Muni"
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "A Tkinter mind-mapping tool with "
+              },
+              {
+                "text": "rich notes",
+                "bold": true,
+                "highlighted": true
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+]

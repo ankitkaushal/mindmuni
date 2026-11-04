@@ -2,6 +2,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 from datetime import datetime
 
+from mindmuni.model.map_style import MapStyle
 from mindmuni.model.node import Node
 from mindmuni.utils.clock import now
 from mindmuni.utils.id_generator import new_id
@@ -11,6 +12,7 @@ from mindmuni.utils.id_generator import new_id
 class MindMap:
     title: str
     root: Node
+    style: MapStyle = field(default_factory=MapStyle)
     map_id: str = field(default_factory=new_id)
     created_at: datetime = field(default_factory=now)
     updated_at: datetime = field(default_factory=now)

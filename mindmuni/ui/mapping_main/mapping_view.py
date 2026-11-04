@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from mindmuni.core.tree_layout import TreeLayout
+from mindmuni.model.map_style import MapLayout
 from mindmuni.model.mind_map import MindMap
 from mindmuni.model.theme import Theme
 from mindmuni.ui.core.view import View
@@ -24,6 +25,14 @@ class MappingView(View):
         self._mind_map = mind_map
         self._redraw()
         self.after_idle(lambda: self._canvas.center_on(mind_map.root.position))
+
+    def set_layout(self, layout: MapLayout) -> None:
+        """Changes the shown map's layout style (RIGHT or BALANCED) and redraws it around the root."""
+        if self._mind_map is None or self._mind_map.style.layout is layout:
+            return
+        self._mind_map.style.layout = layout
+        self._redraw()
+        self.after_idle(lambda: self._canvas.center_on(self._mind_map.root.position))
 
     def apply_theme(self, theme: Theme) -> None:
         self._canvas.apply_theme(theme)

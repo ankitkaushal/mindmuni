@@ -6,11 +6,11 @@ from pathlib import Path
 class JsonFileStore:
     """Low-level JSON read/write. The only class that touches the disk."""
 
-    def read(self, path: Path) -> dict:
+    def read(self, path: Path) -> dict | list:
         with path.open(encoding="utf-8") as json_file:
             return json.load(json_file)
 
-    def write(self, path: Path, data: dict) -> None:
+    def write(self, path: Path, data: dict | list) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         temporary_path = path.with_name(path.name + ".tmp")
         with temporary_path.open("w", encoding="utf-8") as json_file:

@@ -62,7 +62,7 @@ class MapCanvas(tk.Canvas):
     def _draw_nodes(self, root: Node) -> None:
         node_renderer = self._require_node_renderer()
         for node in iter_visible_nodes(root):
-            node_renderer.draw(node)
+            node_renderer.draw(node, grows_left=node.position.x < root.position.x)
 
     def _update_scroll_region(self) -> None:
         left, top, right, bottom = self.bbox("all") or (0, 0, 0, 0)

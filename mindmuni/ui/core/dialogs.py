@@ -2,7 +2,7 @@ from pathlib import Path
 from tkinter import filedialog, messagebox
 import tkinter as tk
 
-MAP_FILE_TYPES = [("Mind Muni map", "*.mindmuni.json"), ("JSON", "*.json"), ("All files", "*")]
+MAP_FILE_TYPES = [("Mind Muni map", "*.mson"), ("All files", "*")]
 THEME_FILE_TYPES = [("Theme", "*.json"), ("All files", "*")]
 
 
@@ -24,8 +24,8 @@ class Dialogs:
             parent=self._parent,
             title="Save map as",
             initialdir=self._default_directory,
-            initialfile=f"{suggested_name}.mindmuni.json",
-            defaultextension=".json",
+            initialfile=f"{suggested_name}.mson",
+            defaultextension=".mson",
             filetypes=MAP_FILE_TYPES,
         )
         return Path(chosen) if chosen else None

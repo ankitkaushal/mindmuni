@@ -45,6 +45,7 @@ The aggregate root. It holds one whole map.
 | `map_id`     | `str`           | UUID                                     |
 | `title`      | `str`           | Shown in the window title                |
 | `root`       | `Node`          | A new map always starts with a root node |
+| `style`      | `MapStyle`      | Map-wide styling                         |
 | `created_at` | `datetime`      |                                          |
 | `updated_at` | `datetime`      |                                          |
 
@@ -52,6 +53,13 @@ Methods:
 - `find_node(node_id) -> Node | None`
 - `iter_nodes() -> Iterator[Node]` walks the tree depth-first.
 - `parent_of(node_id) -> Node | None`
+
+### `MapStyle`
+Styling that applies to the whole map rather than to one node.
+
+| Attribute | Type        | Notes                                                        |
+|-----------|-------------|--------------------------------------------------------------|
+| `layout`  | `MapLayout` | `RIGHT` (all branches to the right of the root, the default) or `BALANCED` (the root's branches split between left and right) |
 
 ### `Node`
 One idea in the map.
@@ -146,7 +154,7 @@ know nothing about Tkinter widgets.
 | `MapFactory`        | `create_new_map(title)` returns a `MindMap` with a default root node            |
 | `MapEditor`         | Edits the map: `add_child`, `add_sibling`, `rename_node`, `delete_node`, `set_shape`, `set_color` |
 | `SelectionManager`  | Tracks the selected node. Provides `select_parent/first_child/next_sibling/previous_sibling` for keyboard navigation |
-| `TreeLayout`        | Computes `Node.position` for every node (horizontal tree layout)               |
+| `TreeLayout`        | Computes `Node.position` for every node, right-only or balanced per `MapStyle.layout` |
 | `ThemeManager`      | Holds the current `Theme`, switches dark/light/custom, notifies subscribers     |
 | `DocumentSession`   | Holds the open `MindMap`, its file path and dirty flag. Also handles new/open/save/save-as through the repositories |
 | `EventBus`          | Simple publish/subscribe (`subscribe(event, handler)`, `publish(event, payload)`) that keeps the UI decoupled from core |
@@ -158,38 +166,69 @@ know nothing about Tkinter widgets.
 
 | Class               | Responsibility                                                  |
 |---------------------|-----------------------------------------------------------------|
-| `MapSerializer`     | `to_dict(MindMap)` / `from_dict(dict)`, including nodes and notes |
+| `MapSerializer`     | `to_document(MindMap)` / `from_document(list)`, splitting map, style and text |
 | `ThemeSerializer`   | `to_dict(Theme)` / `from_dict(dict)`                            |
-| `JsonFileStore`     | Low-level `read(path) -> dict`, `write(path, dict)`             |
+| `JsonFileStore`     | Low-level `read(path) -> dict | list`, `write(path, data)`           |
 | `MapRepository`     | `save(map, path)`, `load(path) -> MindMap`, defaults to the app root directory |
 | `ThemeRepository`   | `load(name) -> Theme`, `load_custom(path)`, `list_available()`  |
 
-### Map file format (`*.mindmuni.json`)
+### Map file format (`*.mson`)
+A `.mson` file is JSON whose top level is a list of three sections, so the
+map's structure, its look and its text are kept apart:
+
+1. **map** – metadata and the node tree: node ids, titles, children.
+2. **style** – UI-only properties, in two parts:
+   - `map`: styling for the whole map. `layout` is `RIGHT` (all branches grow
+     to the right of the root) or `BALANCED` (the root's branches are split
+     between its left and right sides). Default `RIGHT`.
+   - `nodes`: styling for each node, keyed by `node_id`: shape, color, canvas
+     position and collapsed state.
+3. **text** – each node's rich-text note, keyed by `node_id`. Only nodes
+   that have a note get an entry.
+
+The style and text sections may be missing. A missing `map` entry means the
+default map style, a node with no style entry gets the default style, and a node with no text entry has an empty note. Entries
+whose `node_id` is not in the map are ignored.
+
 ```json
-{
-  "format_version": 1,
-  "map_id": "6f1c…",
-  "title": "Project ideas",
-  "created_at": "2026-10-18T19:01:00",
-  "updated_at": "2026-10-18T19:30:00",
-  "root": {
-    "node_id": "a1…",
+[
+  {
+    "format_version": 1,
+    "map_id": "6f1c…",
     "title": "Project ideas",
-    "style": { "shape": "ELLIPSE", "color": "BLUE" },
-    "position": { "x": 400, "y": 300 },
-    "collapsed": false,
-    "note": {
-      "blocks": [
-        { "block_type": "HEADING_1", "spans": [{ "text": "Goals", "bold": false, "highlighted": false }] },
-        { "block_type": "PARAGRAPH", "spans": [
-          { "text": "Ship ", "bold": false, "highlighted": false },
-          { "text": "v1", "bold": true, "highlighted": true }
-        ]}
-      ]
-    },
-    "children": []
+    "created_at": "2026-10-18T19:01:00",
+    "updated_at": "2026-10-18T19:30:00",
+    "root": {
+      "node_id": "a1…",
+      "title": "Project ideas",
+      "children": []
+    }
+  },
+  {
+    "map": { "layout": "BALANCED" },
+    "nodes": {
+      "a1…": {
+        "shape": "ELLIPSE",
+        "color": "BLUE",
+        "position": { "x": 400, "y": 300 },
+        "collapsed": false
+      }
+    }
+  },
+  {
+    "notes": {
+      "a1…": {
+        "blocks": [
+          { "block_type": "HEADING_1", "spans": [{ "text": "Goals", "bold": false, "highlighted": false }] },
+          { "block_type": "PARAGRAPH", "spans": [
+            { "text": "Ship ", "bold": false, "highlighted": false },
+            { "text": "v1", "bold": true, "highlighted": true }
+          ]}
+        ]
+      }
+    }
   }
-}
+]
 ```
 
 ### Theme file format (`themes/<name>.json`)

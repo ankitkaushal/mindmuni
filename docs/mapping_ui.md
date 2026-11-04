@@ -1,7 +1,7 @@
 # Mind Muni: Mapping UI
 
-The mapping component reads a map file, lays the nodes out as a left-to-right
-tree and draws them on a scrollable canvas. It can run on its own through
+The mapping component reads a map file, lays the nodes out as a tree (all
+branches to the right of the root, or balanced on both sides) and draws them on a scrollable canvas. It can run on its own through
 `map_preview.py`, without the main window or menu bar described in
 [ui_core.md](ui_core.md).
 
@@ -27,7 +27,7 @@ In PyCharm, right-click `map_preview.py` and choose **Run**.
 
 The script always loads one file, set at the top of `map_preview.py`:
 ```python
-MAP_FILE = maps_dir() / "sample.mindmuni.json"
+MAP_FILE = maps_dir() / "sample.mson"
 ```
 To preview a different map, put it in `maps/` and change this line.
 
@@ -35,6 +35,7 @@ To preview a different map, put it in `maps/` and change this line.
 | Input | Action |
 |-------|--------|
 | `T` | Switch between the light and dark themes |
+| `L` | Switch between the right and balanced layouts (in memory only; `R` restores the file's layout) |
 | `R` | Reload the map file from disk (edit the JSON, then press R) |
 | Left-drag | Pan the canvas |
 | Mouse wheel | Scroll up and down |
@@ -89,7 +90,7 @@ Minimal example:
 - **Multi-line titles:** use `\n` inside the title.
 - **Collapsed nodes:** their children are hidden, and the node shows a badge with the number of hidden children.
 
-`maps/sample.mindmuni.json` uses every shape, a multi-line title, a collapsed
+`maps/sample.mson` uses every shape, a multi-line title, a collapsed
 node and a rich-text note, so it's a good file to copy from.
 
 ---
@@ -100,28 +101,28 @@ node and a rich-text note, so it's a good file to copy from.
 | File | Contains |
 |------|----------|
 | `map_preview.py` | `MapPreview` creates a bare `tk.Tk` window, puts a `MappingView` in it, loads `MAP_FILE` through `MapRepository`, and binds `T` (theme) and `R` (reload). It's a test harness only; the real app will use `MainWindow` and `ViewNavigator` instead. |
-| `maps/sample.mindmuni.json` | The sample map the preview loads. |
+| `maps/sample.mson` | The sample map the preview loads. |
 
 ### `mindmuni/file/`: persistence
 | File | Contains |
 |------|----------|
-| `json_file_store.py` | `JsonFileStore` reads and writes JSON files (UTF-8, indented). `write()` saves to a `.tmp` file first and then replaces the target, so a crash never leaves a half-written map. |
-| `map_serializer.py` | `MapSerializer.to_dict(map)` and `from_dict(data)` convert between a `MindMap` (with its nodes, styles, positions and notes) and the JSON format. Missing optional fields get defaults. Bad content raises `MapFormatError`, and so does a `format_version` newer than `FORMAT_VERSION`. |
+| `json_file_store.py` | `JsonFileStore` reads and writes JSON files (a dict or a list) (UTF-8, indented). `write()` saves to a `.tmp` file first and then replaces the target, so a crash never leaves a half-written map. |
+| `map_serializer.py` | `MapSerializer.to_document(map)` and `from_document(document)` convert between a `MindMap` and the `.mson` format: a JSON list `[map, style, text]`. The map section holds the node tree and titles, the style section holds map-wide styling (`map.layout`: `RIGHT` or `BALANCED`) and each node's shape, color, position and collapsed state, and the text section holds each node's note. Style and text are keyed by `node_id`. Missing optional fields get defaults. Bad content raises `MapFormatError`, and so does a `format_version` newer than `FORMAT_VERSION`. |
 | `map_repository.py` | `MapRepository.load(path)` and `save(map, path)` combine the store and the serializer. `save` also updates the map's `updated_at`. |
 | `__init__.py` | Re-exports `JsonFileStore`, `MapSerializer`, `MapFormatError` and `MapRepository`. |
 
 ### `mindmuni/core/`: layout
 | File | Contains |
 |------|----------|
-| `tree_layout.py` | `TreeLayout(measure_node, spacing).apply(map)` sets `Node.position` (each node's centre) for every visible node. The root is on the left and there is one column per depth, as wide as the widest node in it. Each parent is centred vertically on its children, and collapsed branches are skipped. Node sizes come from the injected `measure_node` function, so this file has no Tkinter code. `LayoutSpacing` sets the column gap, the sibling gap and the origin. `visible_children(node)` returns no children for a collapsed node. |
+| `tree_layout.py` | `TreeLayout(measure_node, spacing).apply(map)` sets `Node.position` (each node's centre) for every visible node, following `map.style.layout`. With `RIGHT`, the root is on the left and every branch grows to the right. With `BALANCED`, the root's branches are split in order, with the first ones on the right and the rest on the left, so the two sides are about the same height; the left side is a mirror image. Each side has one column per depth, as wide as the widest node in it on that side. Each parent is centred vertically on its children, and collapsed branches are skipped. Node sizes come from the injected `measure_node` function, so this file has no Tkinter code. `LayoutSpacing` sets the column gap, the sibling gap and the origin. `visible_children(node)` returns no children for a collapsed node. |
 
 ### `mindmuni/ui/mapping_main/`: the mapping component (Tkinter)
 | File | Contains |
 |------|----------|
-| `mapping_view.py` | `MappingView` is a `View` subclass and the component's public entry point. `show_map(map)` runs the layout, draws the map and centres the view on the root. `apply_theme(theme)` restyles and redraws, and re-runs the layout because font sizes can change. It wraps the canvas with scrollbars. |
+| `mapping_view.py` | `MappingView` is a `View` subclass and the component's public entry point. `show_map(map)` runs the layout, draws the map and centres the view on the root. `set_layout(layout)` changes the map's `style.layout` and redraws. `apply_theme(theme)` restyles and redraws, and re-runs the layout because font sizes can change. It wraps the canvas with scrollbars. |
 | `map_canvas.py` | `MapCanvas` is a `tk.Canvas`. `apply_theme()` builds the renderers for the theme, `measure_node()` is passed to `TreeLayout`, `draw_map()` draws connectors first and nodes on top, and `center_on(point)` scrolls to a point. It also handles drag-to-pan and wheel scrolling (Linux uses `Button-4/5`, Windows and macOS use `MouseWheel`). |
-| `node_renderer.py` | `NodeRenderer.measure(node)` sizes a node from its title text. `SHAPE_SCALE` makes the box bigger for shapes such as diamonds, ellipses and clouds so the text still fits inside. `draw(node)` draws the shape, the title (in dark or light text for contrast) and the collapsed-children badge. Every item it draws is tagged `"node"` and `node_tag(node_id)` (= `"node:<id>"`), ready for click selection later. |
-| `connector_renderer.py` | `ConnectorRenderer.draw(parent, parent_size, child, child_size)` draws a smooth curve from the parent's right edge to the child's left edge, tagged `"connector"`. |
+| `node_renderer.py` | `NodeRenderer.measure(node)` sizes a node from its title text. `SHAPE_SCALE` makes the box bigger for shapes such as diamonds, ellipses and clouds so the text still fits inside. `draw(node, grows_left)` draws the shape, the title (in dark or light text for contrast) and the collapsed-children badge, which sits on the side the node's children grow towards. Every item it draws is tagged `"node"` and `node_tag(node_id)` (= `"node:<id>"`), ready for click selection later. |
+| `connector_renderer.py` | `ConnectorRenderer.draw(parent, parent_size, child, child_size)` draws a smooth curve, tagged `"connector"`, from the parent's right edge to the child's left edge, or the other way round when the child is to the parent's left. |
 | `__init__.py` | Re-exports `MappingView`, `MapCanvas` and `MAP_VIEW_ID`. |
 
 ### `mindmuni/utils/`: helpers with no domain knowledge
@@ -143,8 +144,8 @@ node and a rich-text note, so it's a good file to copy from.
 ```
 map_preview.py
   MapRepository.load(MAP_FILE)
-    JsonFileStore.read()  ──► dict
-    MapSerializer.from_dict() ──► MindMap
+    JsonFileStore.read()  ──► [map, style, text]
+    MapSerializer.from_document() ──► MindMap
   MappingView.show_map(mind_map)
     TreeLayout.apply(mind_map)
       MapCanvas.measure_node ──► NodeRenderer.measure   (size of every visible node)

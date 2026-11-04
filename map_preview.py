@@ -1,7 +1,7 @@
 """Standalone preview of the mapping component, without the main window or menu bar.
 
 Loads the hard-coded map file below and draws it.
-Keys: T toggles light/dark theme, R reloads the file from disk.
+Keys: T toggles light/dark theme, L toggles right/balanced layout, R reloads the file from disk.
 Mouse: drag to pan, wheel to scroll (Shift+wheel scrolls sideways).
 """
 
@@ -11,11 +11,12 @@ from mindmuni.core.builtin_themes import dark_theme, light_theme
 from mindmuni.file.json_file_store import JsonFileStore
 from mindmuni.file.map_repository import MapRepository
 from mindmuni.file.map_serializer import MapSerializer
+from mindmuni.model.map_style import MapLayout
 from mindmuni.model.mind_map import MindMap
 from mindmuni.ui.mapping_main.mapping_view import MappingView
 from mindmuni.utils.paths import maps_dir
 
-MAP_FILE = maps_dir() / "sample.mindmuni.json"
+MAP_FILE = maps_dir() / "sample.mson"
 WINDOW_GEOMETRY = "1100x700"
 
 
@@ -27,6 +28,7 @@ class MapPreview:
         self._root = self._create_window()
         self._view = MappingView(self._root, self._themes[self._theme_index])
         self._view.pack(fill="both", expand=True)
+        self._mind_map: MindMap | None = None
         self._bind_keys()
 
     def run(self) -> None:
@@ -40,6 +42,7 @@ class MapPreview:
 
     def _bind_keys(self) -> None:
         self._root.bind("<KeyPress-t>", lambda _event: self._toggle_theme())
+        self._root.bind("<KeyPress-l>", lambda _event: self._toggle_layout())
         self._root.bind("<KeyPress-r>", lambda _event: self._reload_map())
 
     def _reload_map(self) -> None:
@@ -47,8 +50,21 @@ class MapPreview:
         self._show(mind_map)
 
     def _show(self, mind_map: MindMap) -> None:
-        self._root.title(f"{mind_map.title} — map preview ({MAP_FILE.name})")
+        self._mind_map = mind_map
+        self._update_title()
         self._view.show_map(mind_map)
+
+    def _update_title(self) -> None:
+        layout = self._mind_map.style.layout.name.lower()
+        self._root.title(f"{self._mind_map.title} — map preview ({MAP_FILE.name}, {layout} layout)")
+
+    def _toggle_layout(self) -> None:
+        """Changes the layout in memory only; press R to go back to the file's layout."""
+        if self._mind_map is None:
+            return
+        is_right = self._mind_map.style.layout is MapLayout.RIGHT
+        self._view.set_layout(MapLayout.BALANCED if is_right else MapLayout.RIGHT)
+        self._update_title()
 
     def _toggle_theme(self) -> None:
         self._theme_index = (self._theme_index + 1) % len(self._themes)
