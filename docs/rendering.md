@@ -183,6 +183,9 @@ by tag later:
    | `HEXAGON` | `create_polygon` | `hexagon`: flat top and bottom, slanted sides inset by `0.6 × half_height` |
    | `CLOUD` | `create_polygon(smooth=True)` | `cloud`: 20 points around an ellipse, alternating between full and 86% radius, which smoothing turns into 10 bumps |
 
+   A selected node's outline uses `palette.selection_outline` instead, at
+   `4 × zoom` wide.
+
 2. **Title.** `create_text` at the node's centre, centre-justified. Text
    colour is dark (`#1a1a1a`) or white depending on the fill's luminance
    (`color_utils.contrast_text_color`, threshold 0.55). The font size is
@@ -208,6 +211,8 @@ bounding box of everything drawn plus `SCROLL_MARGIN` (120) on every side.
 | `MappingView.set_layout(layout)` | ✓ | ✓ | ✓ | Centre on the root |
 | `MappingView.apply_theme(theme)` | ✓ | ✓ | ✓ | Unchanged |
 | `MapCanvas.set_zoom(...)` (wheel, `Ctrl` `+`/`-`/`0`) | — | — | ✓ | Keep the anchor point fixed |
+| Insert / Delete (`MappingView.insert_node`, `delete_selected_node`) | ✓ | ✓ | ✓ | Keep the edited node's parent where it was on screen |
+| Click to select | — | — | ✓ | Unchanged |
 | Pan / scroll | — | — | — | Tk scrolls the existing items |
 
 On a theme change, `MapCanvas.apply_theme` sets the canvas background and
@@ -229,6 +234,7 @@ window may not have its final size until Tk has processed pending events.
 | `mindmuni/ui/mapping_main/mapping_view.py` | `MappingView`: entry point. Owns the `TreeLayout` and the `MapCanvas` with its scrollbars; runs layout + draw. |
 | `mindmuni/ui/mapping_main/map_canvas.py` | `MapCanvas`: zoom, scroll region, panning, wheel handling, draw order. |
 | `mindmuni/ui/mapping_main/node_renderer.py` | `NodeRenderer`: measures and draws one node. |
+| `mindmuni/ui/mapping_main/map_toolbar.py` | `MapToolbar`: the edit toolbar. It is a separate widget placed over the canvas, not drawn on it, so it doesn't scroll or zoom with the map. |
 | `mindmuni/ui/mapping_main/connector_renderer.py` | `ConnectorRenderer`: draws one parent → child curve. |
 | `mindmuni/core/tree_layout.py` | `TreeLayout`, `LayoutSpacing`, `visible_children`: positions, no Tkinter. |
 | `mindmuni/utils/shape_geometry.py` | Polygon points for each shape. |

@@ -14,6 +14,7 @@ HORIZONTAL_PADDING = 14
 VERTICAL_PADDING = 8
 CORNER_RADIUS = 10
 OUTLINE_WIDTH = 2
+SELECTED_OUTLINE_WIDTH = 4
 OUTLINE_DARKEN_FRACTION = 0.3
 BADGE_RADIUS = 9
 
@@ -28,11 +29,17 @@ SHAPE_SCALE: dict[NodeShape, tuple[float, float]] = {
 }
 
 NODE_TAG = "node"
+NODE_TAG_PREFIX = "node:"
 
 
 def node_tag(node_id: str) -> str:
-    """Canvas tag shared by every item that belongs to one node (for hit-testing later)."""
-    return f"node:{node_id}"
+    """Canvas tag shared by every item that belongs to one node, used for hit-testing."""
+    return f"{NODE_TAG_PREFIX}{node_id}"
+
+
+def node_id_from_tags(tags: tuple[str, ...]) -> str | None:
+    """The node id in a canvas item's tags, or None if the item isn't part of a node."""
+    return next((tag.removeprefix(NODE_TAG_PREFIX) for tag in tags if tag.startswith(NODE_TAG_PREFIX)), None)
 
 
 class NodeRenderer:
@@ -60,11 +67,13 @@ class NodeRenderer:
         width_scale, height_scale = SHAPE_SCALE[node.style.shape]
         return Size(base_width * width_scale, base_height * height_scale)
 
-    def draw(self, node: Node, grows_left: bool = False) -> None:
-        """grows_left: the node's children are drawn to its left, so the collapsed badge goes on that side."""
+    def draw(self, node: Node, grows_left: bool = False, selected: bool = False) -> None:
+        """grows_left: the node's children are drawn to its left, so the collapsed badge goes on that side.
+        selected: draw the outline in the theme's selection colour, thicker.
+        """
         fill_color = self._palette.color_for(node.style.color)
         tags = (NODE_TAG, node_tag(node.node_id))
-        self._draw_shape(node, fill_color, tags)
+        self._draw_shape(node, fill_color, selected, tags)
         self._draw_title(node, fill_color, tags)
         if node.collapsed and node.children:
             self._draw_collapsed_badge(node, grows_left, tags)
@@ -75,13 +84,16 @@ class NodeRenderer:
         height = self._font.metrics("linespace") * len(lines)
         return Size(width, height)
 
-    def _draw_shape(self, node: Node, fill_color: str, tags: tuple[str, ...]) -> None:
+    def _draw_shape(self, node: Node, fill_color: str, selected: bool, tags: tuple[str, ...]) -> None:
         size = self.measure(node)
         zoom = self._zoom
         center_x, center_y = node.position.x * zoom, node.position.y * zoom
         half_width, half_height = size.width * zoom / 2, size.height * zoom / 2
-        outline = darken(fill_color, OUTLINE_DARKEN_FRACTION)
-        style = {"fill": fill_color, "outline": outline, "width": self._line_width(), "tags": tags}
+        if selected:
+            outline, width = self._palette.selection_outline, self._line_width(SELECTED_OUTLINE_WIDTH)
+        else:
+            outline, width = darken(fill_color, OUTLINE_DARKEN_FRACTION), self._line_width()
+        style = {"fill": fill_color, "outline": outline, "width": width, "tags": tags}
         match node.style.shape:
             case NodeShape.RECTANGLE:
                 self._canvas.create_rectangle(*shape_geometry.bounding_box(center_x, center_y, half_width, half_height), **style)
@@ -125,5 +137,5 @@ class NodeRenderer:
             badge_x, badge_y, text=str(len(node.children)), font=self._badge_font, fill=self._palette.foreground, tags=tags
         )
 
-    def _line_width(self) -> float:
-        return max(OUTLINE_WIDTH * self._zoom, 1.0)
+    def _line_width(self, base_width: float = OUTLINE_WIDTH) -> float:
+        return max(base_width * self._zoom, 1.0)

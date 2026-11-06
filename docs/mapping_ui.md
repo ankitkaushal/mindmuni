@@ -38,12 +38,21 @@ To preview a different map, put it in `maps/` and change this line.
 | `T` | Switch between the light and dark themes |
 | `L` | Switch between the right and balanced layouts (in memory only; `R` restores the file's layout) |
 | `R` | Reload the map file from disk (edit the JSON, then press R) |
-| Left-drag | Pan the canvas |
+| Left-click a node | Select it (yellow/blue outline, from the theme's `selection_outline`) |
+| Left-click empty space | Clear the selection |
+| `Insert` or the **+ Insert** button | Add a child ("New node") to the selected node and select it |
+| `Delete` or the **✕ Delete** button | Delete the selected node and its subtree, then select its parent. Disabled for the root. |
+| Left-drag on empty space, or middle-drag | Pan the canvas |
 | Mouse wheel | Scroll up and down |
 | Shift + wheel | Scroll sideways |
 | Ctrl + wheel | Zoom in or out around the mouse pointer |
 | `Ctrl` + `+` / `Ctrl` + `-` | Zoom in / out around the middle of the window |
 | `Ctrl` + `0` | Reset the zoom to 100% |
+
+The edit toolbar floats over the bottom-right corner of the canvas and stays
+there when the window is resized. The root is selected when a map is shown.
+Edits only change the map in memory: nothing is saved, and `R` throws them
+away by reloading the file.
 
 Zoom goes from 25% to 300%, 1.2× per step. It only changes how the map is
 drawn: node positions, the layout and the saved file are not affected.
@@ -121,14 +130,17 @@ node and a rich-text note, so it's a good file to copy from.
 ### `mindmuni/core/`: layout
 | File | Contains |
 |------|----------|
+| `map_editor.py` | `MapEditor` is the only code that changes the node tree. `add_child(map, parent_id)` appends a `"New node"` child (expanding a collapsed parent) and returns it. `delete_node(map, node_id)` removes the node with its subtree and returns the parent; it raises `ValueError` for the root. `can_delete()` says whether a node may be deleted. |
+| `selection_manager.py` | `SelectionManager` holds the selected node id (`select`, `clear`, `selected_id`, `selected_node(map)`). Keyboard navigation will go here. |
 | `tree_layout.py` | `TreeLayout(measure_node, spacing).apply(map)` sets `Node.position` (each node's centre) for every visible node, following `map.style.layout`. With `RIGHT`, the root is on the left and every branch grows to the right. With `BALANCED`, the root's branches are split in order, with the first ones on the right and the rest on the left, so the two sides are about the same height; the left side is a mirror image. Each side has one column per depth, as wide as the widest node in it on that side. Each parent is centred vertically on its children, and collapsed branches are skipped. Node sizes come from the injected `measure_node` function, so this file has no Tkinter code. `LayoutSpacing` sets the column gap, the sibling gap and the origin. `visible_children(node)` returns no children for a collapsed node. |
 
 ### `mindmuni/ui/mapping_main/`: the mapping component (Tkinter)
 | File | Contains |
 |------|----------|
-| `mapping_view.py` | `MappingView` is a `View` subclass and the component's public entry point. `show_map(map)` runs the layout, draws the map and centres the view on the root. `set_layout(layout)` changes the map's `style.layout` and redraws. `zoom_in()`, `zoom_out()`, `reset_zoom()` and the `zoom` property pass through to the canvas. `apply_theme(theme)` restyles and redraws, and re-runs the layout because font sizes can change. It wraps the canvas with scrollbars. |
-| `map_canvas.py` | `MapCanvas` is a `tk.Canvas`. `apply_theme()` builds the renderers for the theme, `measure_node()` is passed to `TreeLayout`, `draw_map()` draws connectors first and nodes on top, and `center_on(point)` scrolls to a point. It also handles drag-to-pan, wheel scrolling (Linux uses `Button-4/5`, Windows and macOS use `MouseWheel`) and zoom. Zoom is a view-only transform: node positions stay in map units and the canvas draws map point `p` at `p * zoom`, so zooming redraws without re-running the layout. `set_zoom(zoom, anchor_x, anchor_y)` clamps the zoom to `MIN_ZOOM`..`MAX_ZOOM` and keeps the map point under the anchor (the mouse pointer for Ctrl+wheel, otherwise the middle of the window) in place. |
-| `node_renderer.py` | `NodeRenderer.measure(node)` sizes a node from its title text, in map units (zoom 1). `draw()` scales positions, sizes, line widths and fonts by the renderer's zoom; the zoomed font size is rounded down so the text always fits its box. `SHAPE_SCALE` makes the box bigger for shapes such as diamonds, ellipses and clouds so the text still fits inside. `draw(node, grows_left)` draws the shape, the title (in dark or light text for contrast) and the collapsed-children badge, which sits on the side the node's children grow towards. Every item it draws is tagged `"node"` and `node_tag(node_id)` (= `"node:<id>"`), ready for click selection later. |
+| `mapping_view.py` | `MappingView` is a `View` subclass and the component's public entry point. It owns a `MapEditor`, a `SelectionManager` and the `MapToolbar`; `insert_node()` and `delete_selected_node()` edit the map, then redraw and scroll so the edited node's parent stays put on screen. `show_map(map)` runs the layout, draws the map and centres the view on the root. `set_layout(layout)` changes the map's `style.layout` and redraws. `zoom_in()`, `zoom_out()`, `reset_zoom()` and the `zoom` property pass through to the canvas. `apply_theme(theme)` restyles and redraws, and re-runs the layout because font sizes can change. It wraps the canvas with scrollbars. |
+| `map_canvas.py` | `MapCanvas` is a `tk.Canvas`. `apply_theme()` builds the renderers for the theme, `measure_node()` is passed to `TreeLayout`, `draw_map()` draws connectors first and nodes on top, and `center_on(point)` scrolls to a point. It also handles drag-to-pan, wheel scrolling (Linux uses `Button-4/5`, Windows and macOS use `MouseWheel`), zoom, and clicks: `on_node_click(handler)` reports the id of a clicked node, or `None` for a click on empty space. A left press on a node selects it; a left press on empty space starts a pan, and counts as a click if released within 3px. Zoom is a view-only transform: node positions stay in map units and the canvas draws map point `p` at `p * zoom`, so zooming redraws without re-running the layout. `set_zoom(zoom, anchor_x, anchor_y)` clamps the zoom to `MIN_ZOOM`..`MAX_ZOOM` and keeps the map point under the anchor (the mouse pointer for Ctrl+wheel, otherwise the middle of the window) in place. |
+| `map_toolbar.py` | `MapToolbar` is the floating edit toolbar (**+ Insert**, **✕ Delete**). It uses plain `tk` widgets coloured from the theme, so it looks right with or without `ThemeStyler`. `pin_to(widget)` places it over the widget's bottom-right corner with `place(relx=1, rely=1, anchor="se")`, so it follows resizes. `set_enabled(insert, delete)` greys out buttons that can't be used. |
+| `node_renderer.py` | `NodeRenderer.measure(node)` sizes a node from its title text, in map units (zoom 1). `draw()` scales positions, sizes, line widths and fonts by the renderer's zoom; the zoomed font size is rounded down so the text always fits its box. `SHAPE_SCALE` makes the box bigger for shapes such as diamonds, ellipses and clouds so the text still fits inside. `draw(node, grows_left)` draws the shape, the title (in dark or light text for contrast) and the collapsed-children badge, which sits on the side the node's children grow towards. Every item it draws is tagged `"node"` and `node_tag(node_id)` (= `"node:<id>"`); `node_id_from_tags()` reads the id back for click selection. A selected node gets a thicker outline in the theme's `selection_outline` colour. |
 | `connector_renderer.py` | `ConnectorRenderer.draw(parent, parent_size, child, child_size)` draws a smooth curve, tagged `"connector"`, from the parent's right edge to the child's left edge, or the other way round when the child is to the parent's left. |
 | `__init__.py` | Re-exports `MappingView`, `MapCanvas` and `MAP_VIEW_ID`. |
 
@@ -170,7 +182,8 @@ the new colours and fonts, then runs the same layout and drawing steps again.
 ---
 
 ## 5. Not yet implemented
-- Selecting a node by click or with the arrow keys. Left-drag currently pans, so panning will move to the middle button or to dragging on empty space.
-- Editing: add child (Tab), add sibling (Enter), delete, rename (F2), and choosing shape and colour (`MapEditor`, `MapToolbar`, `StylePicker`).
+- Selecting a node with the arrow keys.
+- Editing: add sibling (Enter), rename (F2), and choosing shape and colour (`StylePicker`). Undo.
+- Saving edits back to the file.
 - Opening a node's note in the text editor (Ctrl+E).
 - Registering `MappingView` in `app.py` in place of the `"map"` placeholder.

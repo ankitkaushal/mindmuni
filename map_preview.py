@@ -2,8 +2,10 @@
 
 Loads the hard-coded map file below and draws it.
 Keys: T toggles light/dark theme, L toggles right/balanced layout, R reloads the file from disk,
-Ctrl+plus / Ctrl+minus zoom in and out, Ctrl+0 resets the zoom.
-Mouse: drag to pan, wheel to scroll (Shift+wheel scrolls sideways, Ctrl+wheel zooms around the pointer).
+Ctrl+plus / Ctrl+minus zoom in and out, Ctrl+0 resets the zoom,
+Insert adds a child to the selected node, Delete deletes the selected node (edits are not saved).
+Mouse: click a node to select it, drag empty space (or middle-drag) to pan, wheel to scroll
+(Shift+wheel scrolls sideways, Ctrl+wheel zooms around the pointer).
 """
 
 import tkinter as tk
@@ -49,6 +51,8 @@ class MapPreview:
         ShortcutMap.bind_local(self._root, ShortcutMap.ZOOM_IN, self._view.zoom_in)
         ShortcutMap.bind_local(self._root, ShortcutMap.ZOOM_OUT, self._view.zoom_out)
         ShortcutMap.bind_local(self._root, ShortcutMap.RESET_ZOOM, self._view.reset_zoom)
+        ShortcutMap.bind_local(self._root, ShortcutMap.INSERT_NODE, self._view.insert_node)
+        ShortcutMap.bind_local(self._root, ShortcutMap.DELETE_NODE, self._view.delete_selected_node)
 
     def _reload_map(self) -> None:
         mind_map = self._repository.load(MAP_FILE)

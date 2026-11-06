@@ -1,6 +1,6 @@
 import sys
 import tkinter as tk
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 
 from mindmuni.core.tree_layout import visible_children
 from mindmuni.model.geometry import Point, Size
@@ -8,7 +8,7 @@ from mindmuni.model.mind_map import MindMap
 from mindmuni.model.node import Node
 from mindmuni.model.theme import Theme
 from mindmuni.ui.mapping_main.connector_renderer import ConnectorRenderer
-from mindmuni.ui.mapping_main.node_renderer import NodeRenderer
+from mindmuni.ui.mapping_main.node_renderer import NodeRenderer, node_id_from_tags
 
 SCROLL_MARGIN = 120
 WHEEL_SCROLL_UNITS = 3
@@ -18,6 +18,9 @@ MAX_ZOOM = 3.0
 ZOOM_STEP = 1.2  # each zoom in multiplies the zoom by this, each zoom out divides by it
 CONTROL_MASK = 0x0004
 SHIFT_MASK = 0x0001
+CLICK_TOLERANCE = 3  # a press and release closer than this (in pixels) is a click, not a pan
+
+NodeClickHandler = Callable[[str | None], None]
 
 
 def iter_visible_nodes(root: Node) -> Iterator[Node]:
@@ -33,6 +36,9 @@ class MapCanvas(tk.Canvas):
 
     Node positions stay in map units; the canvas shows map point p at canvas point p * zoom.
     Zooming only redraws, it never re-runs the layout or changes Node.position.
+
+    Left-click on a node reports its id to the click handler. Left-drag on empty space (or middle-drag
+    anywhere) pans; a left-click on empty space without dragging reports None.
     """
 
     def __init__(self, parent: tk.Misc) -> None:
@@ -40,6 +46,9 @@ class MapCanvas(tk.Canvas):
         self._theme: Theme | None = None
         self._zoom = 1.0
         self._mind_map: MindMap | None = None
+        self._selected_id: str | None = None
+        self._on_node_click: NodeClickHandler = lambda _node_id: None
+        self._press_point: tuple[int, int] | None = None  # where an empty-space left press started, for panning
         self._node_renderer: NodeRenderer | None = None
         self._connector_renderer: ConnectorRenderer | None = None
         self._bind_panning()
@@ -58,8 +67,13 @@ class MapCanvas(tk.Canvas):
         """Size in map units (zoom 1), for the layout."""
         return self._require_node_renderer().measure(node)
 
-    def draw_map(self, mind_map: MindMap) -> None:
+    def on_node_click(self, handler: NodeClickHandler) -> None:
+        """handler(node_id) on a click on a node; handler(None) on a click on empty space."""
+        self._on_node_click = handler
+
+    def draw_map(self, mind_map: MindMap, selected_id: str | None = None) -> None:
         self._mind_map = mind_map
+        self._selected_id = selected_id
         self.delete("all")
         self._draw_connectors(mind_map.root)
         self._draw_nodes(mind_map.root)
@@ -68,6 +82,14 @@ class MapCanvas(tk.Canvas):
     def center_on(self, point: Point) -> None:
         """Scrolls so the map point (in map units) is in the middle of the window."""
         self._scroll_to(point, self.winfo_width() / 2, self.winfo_height() / 2)
+
+    def window_point_of(self, point: Point) -> tuple[float, float]:
+        """Where the map point (in map units) currently appears in the window, in window pixels."""
+        return point.x * self._zoom - self.canvasx(0), point.y * self._zoom - self.canvasy(0)
+
+    def scroll_point_to(self, point: Point, window_x: float, window_y: float) -> None:
+        """Scrolls so the map point (in map units) appears at the window point, e.g. to undo a layout shift."""
+        self._scroll_to(point, window_x, window_y)
 
     def zoom_in(self) -> None:
         self.set_zoom(self._zoom * ZOOM_STEP)
@@ -92,7 +114,7 @@ class MapCanvas(tk.Canvas):
         self._zoom = zoom
         self._build_renderers()
         if self._mind_map is not None:
-            self.draw_map(self._mind_map)
+            self.draw_map(self._mind_map, self._selected_id)
             self._scroll_to(anchor, anchor_x, anchor_y)
 
     def _build_renderers(self) -> None:
@@ -118,7 +140,9 @@ class MapCanvas(tk.Canvas):
     def _draw_nodes(self, root: Node) -> None:
         node_renderer = self._require_node_renderer()
         for node in iter_visible_nodes(root):
-            node_renderer.draw(node, grows_left=node.position.x < root.position.x)
+            node_renderer.draw(
+                node, grows_left=node.position.x < root.position.x, selected=node.node_id == self._selected_id
+            )
 
     def _update_scroll_region(self) -> None:
         left, top, right, bottom = self.bbox("all") or (0, 0, 0, 0)
@@ -134,8 +158,41 @@ class MapCanvas(tk.Canvas):
     # --- navigation ---------------------------------------------------------
 
     def _bind_panning(self) -> None:
-        self.bind("<ButtonPress-1>", lambda event: self.scan_mark(event.x, event.y))
-        self.bind("<B1-Motion>", lambda event: self.scan_dragto(event.x, event.y, gain=1))
+        self.bind("<ButtonPress-1>", self._on_left_press)
+        self.bind("<B1-Motion>", self._on_left_drag)
+        self.bind("<ButtonRelease-1>", self._on_left_release)
+        self.bind("<ButtonPress-2>", lambda event: self.scan_mark(event.x, event.y))
+        self.bind("<B2-Motion>", lambda event: self.scan_dragto(event.x, event.y, gain=1))
+
+    def _on_left_press(self, event: tk.Event) -> None:
+        node_id = self._node_id_at(event.x, event.y)
+        if node_id is not None:
+            self._press_point = None
+            self._on_node_click(node_id)
+            return
+        self._press_point = (event.x, event.y)
+        self.scan_mark(event.x, event.y)
+
+    def _on_left_drag(self, event: tk.Event) -> None:
+        if self._press_point is not None:
+            self.scan_dragto(event.x, event.y, gain=1)
+
+    def _on_left_release(self, event: tk.Event) -> None:
+        if self._press_point is None:
+            return
+        start_x, start_y = self._press_point
+        self._press_point = None
+        if abs(event.x - start_x) <= CLICK_TOLERANCE and abs(event.y - start_y) <= CLICK_TOLERANCE:
+            self._on_node_click(None)
+
+    def _node_id_at(self, window_x: int, window_y: int) -> str | None:
+        """The node drawn at the window point, if any (the topmost item there that belongs to a node)."""
+        x, y = self.canvasx(window_x), self.canvasy(window_y)
+        for item in reversed(self.find_overlapping(x, y, x, y)):
+            node_id = node_id_from_tags(self.gettags(item))
+            if node_id is not None:
+                return node_id
+        return None
 
     def _bind_mouse_wheel(self) -> None:
         if sys.platform.startswith("linux"):

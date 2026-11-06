@@ -23,6 +23,8 @@ class ShortcutMap:
     ZOOM_IN = Shortcut(("<Control-plus>", "<Control-equal>", "<Control-KP_Add>"), "Ctrl++")
     ZOOM_OUT = Shortcut(("<Control-minus>", "<Control-KP_Subtract>"), "Ctrl+-")
     RESET_ZOOM = Shortcut(("<Control-0>", "<Control-KP_0>"), "Ctrl+0")
+    INSERT_NODE = Shortcut(("<Insert>", "<KP_Insert>"), "Insert")
+    DELETE_NODE = Shortcut(("<Delete>", "<KP_Delete>"), "Delete")
 
     @staticmethod
     def bind_global(root: tk.Tk, shortcut: Shortcut, action: Callable[[], None]) -> None:
