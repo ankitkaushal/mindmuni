@@ -6,7 +6,8 @@ branches to the right of the root, or balanced on both sides) and draws them on 
 [ui_core.md](ui_core.md).
 
 See [modules.md](modules.md) for the full package layout and
-[object_model.md](object_model.md) for the domain classes.
+[object_model.md](object_model.md) for the domain classes. For a step-by-step walkthrough of how
+a map is measured, laid out and drawn, see [rendering.md](rendering.md).
 
 ---
 
