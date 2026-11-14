@@ -119,7 +119,7 @@ Minimal example:
 }
 ```
 
-- **Shapes:** `RECTANGLE` (rounded corners), `ELLIPSE`, `DIAMOND`, `HEXAGON`, `CLOUD`, `STAR` (yantra-style: an upward and a downward equilateral triangle). Older files that use `ROUNDED_RECTANGLE` still load, as `RECTANGLE`.
+- **Shapes:** `RECTANGLE` (rounded corners), `ELLIPSE`, `DIAMOND`, `HEXAGON`, `CLOUD`, `STAR` (yantra-style: an upward and a downward equilateral triangle).
 - **Colours:** `RED`, `ORANGE`, `AMBER`, `YELLOW`, `LIME`, `GREEN`, `TEAL`, `CYAN`, `BLUE`, `INDIGO`, `PURPLE`, `PINK`
 - **Multi-line titles:** use `\n` inside the title.
 - **Collapsed nodes:** their children are hidden, and the node shows a badge with the number of hidden children.
