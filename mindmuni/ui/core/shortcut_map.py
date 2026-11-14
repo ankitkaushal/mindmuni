@@ -24,6 +24,7 @@ class ShortcutMap:
     ZOOM_OUT = Shortcut(("<Control-minus>", "<Control-KP_Subtract>"), "Ctrl+-")
     RESET_ZOOM = Shortcut(("<Control-0>", "<Control-KP_0>"), "Ctrl+0")
     INSERT_NODE = Shortcut(("<Insert>", "<KP_Insert>"), "Insert")
+    EDIT_TITLE = Shortcut(("<F2>",), "F2")
     DELETE_NODE = Shortcut(("<Delete>", "<KP_Delete>"), "Delete")
 
     @staticmethod

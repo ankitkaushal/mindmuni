@@ -3,8 +3,8 @@
 Loads the hard-coded map file below and draws it.
 Keys: T toggles light/dark theme, L toggles right/balanced layout, R reloads the file from disk,
 Ctrl+plus / Ctrl+minus zoom in and out, Ctrl+0 resets the zoom,
-Insert adds a child to the selected node, Delete deletes the selected node (edits are not saved).
-Mouse: click a node to select it, use the bottom-left toolbar to change its colour and shape, drag empty space (or middle-drag) to pan, wheel to scroll
+Insert adds a child to the selected node, F2 edits its title, Delete deletes it (edits are not saved).
+Mouse: click a node to select it, double-click it to edit its title, use the bottom-left toolbar to change its colour and shape, drag empty space (or middle-drag) to pan, wheel to scroll
 (Shift+wheel scrolls sideways, Ctrl+wheel zooms around the pointer).
 """
 
@@ -53,6 +53,7 @@ class MapPreview:
         ShortcutMap.bind_local(self._root, ShortcutMap.RESET_ZOOM, self._view.reset_zoom)
         ShortcutMap.bind_local(self._root, ShortcutMap.INSERT_NODE, self._view.insert_node)
         ShortcutMap.bind_local(self._root, ShortcutMap.DELETE_NODE, self._view.delete_selected_node)
+        ShortcutMap.bind_local(self._root, ShortcutMap.EDIT_TITLE, self._view.edit_selected_title)
 
     def _reload_map(self) -> None:
         mind_map = self._repository.load(MAP_FILE)

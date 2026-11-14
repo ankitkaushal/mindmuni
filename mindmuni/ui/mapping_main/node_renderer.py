@@ -30,6 +30,7 @@ SHAPE_SCALE: dict[NodeShape, tuple[float, float]] = {
 STAR_TEXT_MARGIN = 4  # space between the title and the star's inner hexagon
 
 NODE_TAG = "node"
+TITLE_TAG = "title"  # on a node's title text, so the title editor can find it and type into it
 NODE_TAG_PREFIX = "node:"
 
 
@@ -129,7 +130,7 @@ class NodeRenderer:
             font=self._drawn_font,
             fill=contrast_text_color(fill_color),
             justify="center",
-            tags=tags,
+            tags=(*tags, TITLE_TAG),
         )
 
     def _draw_collapsed_badge(self, node: Node, grows_left: bool, tags: tuple[str, ...]) -> None:

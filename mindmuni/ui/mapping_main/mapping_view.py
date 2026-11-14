@@ -13,6 +13,7 @@ from mindmuni.ui.core.view import View
 from mindmuni.ui.mapping_main.map_canvas import MapCanvas
 from mindmuni.ui.mapping_main.map_toolbar import MapToolbar
 from mindmuni.ui.mapping_main.style_toolbar import StyleToolbar
+from mindmuni.ui.mapping_main.title_editor import TitleEditor
 
 MAP_VIEW_ID = "map"
 
@@ -22,6 +23,9 @@ class MappingView(View):
 
     The edit toolbar floats over the canvas's bottom-right corner and the style toolbar (colour and shape)
     over its bottom-left corner; both stay there when the window is resized.
+
+    A node's title is edited in place (double-click, F2 or the Edit button), by typing into its drawn text.
+    Every action that redraws first stops editing and saves what was typed, because a redraw replaces that text.
     """
 
     def __init__(
@@ -33,15 +37,22 @@ class MappingView(View):
         self._selection = SelectionManager()
         self._canvas = self._create_scrollable_canvas()
         self._canvas.on_node_click(self._on_node_click)
+        self._canvas.on_node_double_click(self._on_node_double_click)
+        self._canvas.on_before_zoom(self._finish_editing)
         self._layout = TreeLayout(self._canvas.measure_node)
-        self._toolbar = MapToolbar(self, on_insert=self.insert_node, on_delete=self.delete_selected_node)
+        self._title_editor = TitleEditor(self._canvas, on_commit=self._rename_node)
+        self._toolbar = MapToolbar(
+            self, on_insert=self.insert_node, on_edit=self.edit_selected_title, on_delete=self.delete_selected_node
+        )
         self._toolbar.pin_to(self._canvas)
         self._style_toolbar = StyleToolbar(self, on_color=self.set_selected_color, on_shape=self.set_selected_shape)
         self._style_toolbar.pin_to(self._canvas)
+        self._theme = theme
         self.apply_theme(theme)
 
     def show_map(self, mind_map: MindMap) -> None:
         """Shows the map with its root selected, centred on the root."""
+        self._title_editor.cancel()  # the node being edited belongs to the old map
         self._mind_map = mind_map
         self._selection.select(mind_map.root.node_id)
         self._redraw()
@@ -51,6 +62,7 @@ class MappingView(View):
         """Changes the shown map's layout style (RIGHT or BALANCED) and redraws it around the root."""
         if self._mind_map is None or self._mind_map.style.layout is layout:
             return
+        self._finish_editing()
         self._mind_map.style.layout = layout
         self._redraw()
         self.after_idle(lambda: self._canvas.center_on(self._mind_map.root.position))
@@ -58,7 +70,8 @@ class MappingView(View):
     # --- editing ------------------------------------------------------------
 
     def insert_node(self) -> None:
-        """Adds a child to the selected node and selects the new child."""
+        """Adds a child to the selected node, selects it and opens its title for editing, ready to type over."""
+        self._finish_editing()
         selected = self._selected_node()
         if selected is None:
             return
@@ -66,9 +79,19 @@ class MappingView(View):
         child = self._editor.add_child(self._mind_map, selected.node_id)
         self._selection.select(child.node_id)
         self._redraw_keeping_in_place(selected, anchor)
+        self.edit_selected_title(select_all=True)
+
+    def edit_selected_title(self, select_all: bool = False) -> None:
+        """Opens the selected node's title for editing in place. Enter saves, Shift+Enter adds a line, Esc cancels."""
+        self._finish_editing()
+        selected = self._selected_node()
+        if selected is None:
+            return
+        self._title_editor.start(selected, self._theme, select_all)
 
     def delete_selected_node(self) -> None:
         """Deletes the selected node with its subtree and selects its parent. Does nothing for the root."""
+        self._finish_editing()
         selected = self._selected_node()
         if selected is None or not self._editor.can_delete(self._mind_map, selected.node_id):
             return
@@ -80,6 +103,7 @@ class MappingView(View):
 
     def set_selected_color(self, color: NodeColor) -> None:
         """Changes the selected node's colour. Sizes don't change, so the map is only redrawn."""
+        self._finish_editing()
         selected = self._selected_node()
         if selected is None or not self._editor.set_color(self._mind_map, selected.node_id, color):
             return
@@ -88,6 +112,7 @@ class MappingView(View):
 
     def set_selected_shape(self, shape: NodeShape) -> None:
         """Changes the selected node's shape. Its size can change, so the layout runs again with the node kept in place."""
+        self._finish_editing()
         selected = self._selected_node()
         if selected is None:
             return
@@ -111,6 +136,8 @@ class MappingView(View):
         return self._canvas.zoom
 
     def apply_theme(self, theme: Theme) -> None:
+        self._finish_editing()
+        self._theme = theme
         self._canvas.apply_theme(theme)
         self._toolbar.apply_theme(theme)
         self._style_toolbar.apply_theme(theme)
@@ -119,11 +146,34 @@ class MappingView(View):
     # --- internals ----------------------------------------------------------
 
     def _on_node_click(self, node_id: str | None) -> None:
+        if node_id is not None and node_id == self._title_editor.node_id:
+            return  # a click on the title being edited keeps editing
+        self._finish_editing()
         if self._mind_map is None or node_id == self._selection.selected_id:
             return
         self._selection.select(node_id)
         self._canvas.draw_map(self._mind_map, node_id)  # selection doesn't change sizes, so no new layout
         self._update_toolbar()
+
+    def _on_node_double_click(self, node_id: str) -> None:
+        if self._mind_map is None:
+            return
+        if node_id != self._selection.selected_id:
+            self._on_node_click(node_id)
+        self.edit_selected_title()
+
+    def _finish_editing(self) -> None:
+        """Closes the title editor if it is open, saving what was typed."""
+        self._title_editor.finish()
+
+    def _rename_node(self, node_id: str, title: str) -> None:
+        """Saves an edited title. The node's size can change, so the layout runs again with the node kept in place."""
+        node = self._mind_map.find_node(node_id) if self._mind_map is not None else None
+        if node is None:
+            return
+        anchor = self._canvas.window_point_of(node.position)
+        if self._editor.set_title(self._mind_map, node_id, title):
+            self._redraw_keeping_in_place(node, anchor)
 
     def _selected_node(self) -> Node | None:
         if self._mind_map is None:
@@ -147,7 +197,7 @@ class MappingView(View):
     def _update_toolbar(self) -> None:
         selected = self._selected_node()
         can_delete = selected is not None and self._editor.can_delete(self._mind_map, selected.node_id)
-        self._toolbar.set_enabled(insert=selected is not None, delete=can_delete)
+        self._toolbar.set_enabled(insert=selected is not None, edit=selected is not None, delete=can_delete)
         if selected is None:
             self._style_toolbar.show_style(None, None)
         else:

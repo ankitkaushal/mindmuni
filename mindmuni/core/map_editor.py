@@ -28,6 +28,21 @@ class MapEditor:
         mind_map.touch()
         return parent
 
+    def set_title(self, mind_map: MindMap, node_id: str, title: str) -> bool:
+        """Sets the node's title, without leading or trailing whitespace. A blank title is refused (ValueError).
+
+        Returns whether anything changed (a new title can change the node's size).
+        """
+        node = self._require_node(mind_map, node_id)
+        title = title.strip()
+        if not title:
+            raise ValueError("A node's title can't be blank")
+        if node.title == title:
+            return False
+        node.title = title
+        mind_map.touch()
+        return True
+
     def set_color(self, mind_map: MindMap, node_id: str, color: NodeColor) -> bool:
         """Sets the node's colour. Returns whether anything changed."""
         node = self._require_node(mind_map, node_id)

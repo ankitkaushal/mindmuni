@@ -21,6 +21,7 @@ SHIFT_MASK = 0x0001
 CLICK_TOLERANCE = 3  # a press and release closer than this (in pixels) is a click, not a pan
 
 NodeClickHandler = Callable[[str | None], None]
+NodeDoubleClickHandler = Callable[[str], None]
 
 
 def iter_visible_nodes(root: Node) -> Iterator[Node]:
@@ -37,8 +38,9 @@ class MapCanvas(tk.Canvas):
     Node positions stay in map units; the canvas shows map point p at canvas point p * zoom.
     Zooming only redraws, it never re-runs the layout or changes Node.position.
 
-    Left-click on a node reports its id to the click handler. Left-drag on empty space (or middle-drag
-    anywhere) pans; a left-click on empty space without dragging reports None.
+    Left-click on a node reports its id to the click handler, and a double-click on a node reports it to the
+    double-click handler. Left-drag on empty space (or middle-drag anywhere) pans; a left-click on empty space
+    without dragging reports None.
     """
 
     def __init__(self, parent: tk.Misc) -> None:
@@ -48,6 +50,8 @@ class MapCanvas(tk.Canvas):
         self._mind_map: MindMap | None = None
         self._selected_id: str | None = None
         self._on_node_click: NodeClickHandler = lambda _node_id: None
+        self._on_node_double_click: NodeDoubleClickHandler = lambda _node_id: None
+        self._on_before_zoom: Callable[[], None] = lambda: None
         self._press_point: tuple[int, int] | None = None  # where an empty-space left press started, for panning
         self._node_renderer: NodeRenderer | None = None
         self._connector_renderer: ConnectorRenderer | None = None
@@ -70,6 +74,14 @@ class MapCanvas(tk.Canvas):
     def on_node_click(self, handler: NodeClickHandler) -> None:
         """handler(node_id) on a click on a node; handler(None) on a click on empty space."""
         self._on_node_click = handler
+
+    def on_node_double_click(self, handler: NodeDoubleClickHandler) -> None:
+        """handler(node_id) on a double-click on a node. The first click of the pair is reported as a click."""
+        self._on_node_double_click = handler
+
+    def on_before_zoom(self, handler: Callable[[], None]) -> None:
+        """handler() runs before every zoom change, while the map is still drawn at the old zoom."""
+        self._on_before_zoom = handler
 
     def draw_map(self, mind_map: MindMap, selected_id: str | None = None) -> None:
         self._mind_map = mind_map
@@ -108,6 +120,7 @@ class MapCanvas(tk.Canvas):
         zoom = min(max(zoom, MIN_ZOOM), MAX_ZOOM)
         if zoom == self._zoom:
             return
+        self._on_before_zoom()
         if anchor_x is None or anchor_y is None:
             anchor_x, anchor_y = self.winfo_width() / 2, self.winfo_height() / 2
         anchor = Point(self.canvasx(anchor_x) / self._zoom, self.canvasy(anchor_y) / self._zoom)
@@ -159,6 +172,7 @@ class MapCanvas(tk.Canvas):
 
     def _bind_panning(self) -> None:
         self.bind("<ButtonPress-1>", self._on_left_press)
+        self.bind("<Double-Button-1>", self._on_double_click)
         self.bind("<B1-Motion>", self._on_left_drag)
         self.bind("<ButtonRelease-1>", self._on_left_release)
         self.bind("<ButtonPress-2>", lambda event: self.scan_mark(event.x, event.y))
@@ -172,6 +186,11 @@ class MapCanvas(tk.Canvas):
             return
         self._press_point = (event.x, event.y)
         self.scan_mark(event.x, event.y)
+
+    def _on_double_click(self, event: tk.Event) -> None:
+        node_id = self._node_id_at(event.x, event.y)
+        if node_id is not None:
+            self._on_node_double_click(node_id)
 
     def _on_left_drag(self, event: tk.Event) -> None:
         if self._press_point is not None:

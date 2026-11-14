@@ -134,16 +134,19 @@ palette, switching themes recolours the selection too.
 `MappingView._update_toolbar()` runs after every redraw and every selection
 change:
 
-| Selection | **+ Insert** | **✕ Delete** | Style toolbar |
-|-----------|:------------:|:------------:|:-------------:|
-| Nothing selected | disabled | disabled | greyed out |
-| The root | enabled | disabled (`MapEditor.can_delete` is `False` for the root) | enabled |
-| Any other node | enabled | enabled | enabled |
+| Selection | **+ Insert** | **✎ Edit** | **✕ Delete** | Style toolbar |
+|-----------|:------------:|:----------:|:------------:|:-------------:|
+| Nothing selected | disabled | disabled | disabled | greyed out |
+| The root | enabled | enabled | disabled (`MapEditor.can_delete` is `False` for the root) | enabled |
+| Any other node | enabled | enabled | enabled | enabled |
 
 The style toolbar also rings the selected node's current colour and shape,
 via `StyleToolbar.show_style()`.
 
-The `Insert` and `Delete` keys call the same methods as the buttons, and
+Double-clicking a node selects it (if it isn't already) and opens its
+title for editing.
+
+The `Insert`, `F2` and `Delete` keys call the same methods as the buttons, and
 those methods check the selection again, so a key press with nothing
 selected (or with the root selected, for Delete) does nothing.
 
