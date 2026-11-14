@@ -86,7 +86,7 @@ Methods:
 | `color`   | `NodeColor` |
 
 ### `NodeShape` (Enum)
-`RECTANGLE`, `ROUNDED_RECTANGLE`, `ELLIPSE`, `DIAMOND`, `HEXAGON`, `CLOUD`
+`RECTANGLE` (drawn with rounded corners), `ELLIPSE`, `DIAMOND`, `HEXAGON`, `CLOUD`, `STAR` (yantra-style six-pointed star: an upward and a downward equilateral triangle)
 
 ### `NodeColor` (Enum, 12 colors)
 `RED`, `ORANGE`, `AMBER`, `YELLOW`, `LIME`, `GREEN`, `TEAL`, `CYAN`, `BLUE`,
@@ -271,7 +271,7 @@ whose `node_id` is not in the map are ignored.
 | `NodeRenderer`        | Draws one node shape and its label (one method per `NodeShape`)        |
 | `ConnectorRenderer`   | Draws parent-to-child lines                                            |
 | `MapToolbar`          | Buttons: Add Child, Add Sibling, Delete, Open Note, Shape ▾, Color ▾   |
-| `StylePicker`         | Popup with the shape list and a 12-color swatch grid                   |
+| `StyleToolbar`        | Floating toolbar with the 12 colour swatches and the shape icons       |
 | `TextEditorView`      | Text component: toolbar plus `tk.Text`, and a Back button              |
 | `FormattingToolbar`   | H1, H2, Normal, **Bold**, Highlight buttons                            |
 | `RichTextAdapter`     | Converts `NoteDocument` to and from `tk.Text` tags                      |

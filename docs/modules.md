@@ -72,7 +72,8 @@ MindMuni/
     │   │   ├── node_renderer.py    # NodeRenderer
     │   │   ├── connector_renderer.py
     │   │   ├── map_toolbar.py      # MapToolbar
-    │   │   └── style_picker.py     # StylePicker
+    │   │   ├── style_toolbar.py    # StyleToolbar (colour and shape picker)
+    │   │   └── shape_drawing.py    # draw_shape, shared by NodeRenderer and StyleToolbar
     │   │
     │   └── text_editor/            # Node text component
     │       ├── __init__.py
@@ -85,7 +86,7 @@ MindMuni/
         ├── id_generator.py         # new_id() -> uuid4 string
         ├── paths.py                # app_root_dir(), maps_dir(), themes_dir()
         ├── color_utils.py          # contrast_text_color(hex), darken(hex, pct)
-        ├── shape_geometry.py       # Polygon points for diamond, hexagon and other shapes
+        ├── shape_geometry.py       # Polygon points for diamond, hexagon, star and other shapes
         └── clock.py                # now(), so tests can control time
 ```
 

@@ -3,7 +3,7 @@ from collections.abc import Callable
 
 from mindmuni.model.node_style import NodeColor, NodeShape
 from mindmuni.model.theme import Theme
-from mindmuni.utils import shape_geometry
+from mindmuni.ui.mapping_main.shape_drawing import draw_shape
 from mindmuni.utils.color_utils import darken
 
 TOOLBAR_MARGIN = 16  # gap between the toolbar and the canvas's bottom-left corner
@@ -23,7 +23,7 @@ ARROW_GAP_WIDTH = 28  # gap between the picker box and the name box, holding one
 ARROW_MARGIN = 4  # space between each arrow end and the boxes
 ARROW_WIDTH = 1.5
 ARROW_HEAD = (7, 8, 3)  # Tk arrowshape: length to tip, length to back corners, half-width
-NAME_WIDTH = 17  # characters; fits the longest name ("Rounded rectangle"), so the toolbar doesn't resize
+NAME_WIDTH = 9  # characters; fits the longest name ("Rectangle"), so the toolbar doesn't resize
 
 # Every NodeColor gets a swatch, so the palette stays limited to the major colours defined in the model.
 COLORS: tuple[NodeColor, ...] = tuple(NodeColor)
@@ -189,23 +189,11 @@ class StyleToolbar(tk.Frame):
         half_height = SHAPE_ICON_HEIGHT / 2 - SHAPE_ICON_PADDING
         # Outline only (no fill), so the icons stay transparent over the toolbar background.
         outline = palette.menu_foreground if self._enabled else palette.connector_line
-        style = {"fill": "", "outline": outline, "width": 1.5}
-        match shape:
-            case NodeShape.RECTANGLE:
-                icon.create_rectangle(*shape_geometry.bounding_box(center_x, center_y, half_width, half_height), **style)
-            case NodeShape.ELLIPSE:
-                icon.create_oval(*shape_geometry.bounding_box(center_x, center_y, half_width, half_height), **style)
-            case NodeShape.ROUNDED_RECTANGLE:
-                points = shape_geometry.rounded_rectangle(center_x, center_y, half_width, half_height, CORNER_RADIUS)
-                icon.create_polygon(points, smooth=True, **style)
-            case NodeShape.DIAMOND:
-                icon.create_polygon(shape_geometry.diamond(center_x, center_y, half_width, half_height), **style)
-            case NodeShape.HEXAGON:
-                icon.create_polygon(shape_geometry.hexagon(center_x, center_y, half_width, half_height), **style)
-            case NodeShape.CLOUD:
-                icon.create_polygon(shape_geometry.cloud(center_x, center_y, half_width, half_height), smooth=True, **style)
-
+        draw_shape(
+            icon, shape, center_x, center_y, half_width, half_height,
+            corner_radius=CORNER_RADIUS, fill="", outline=outline, width=1.5,
+        )
 
 def style_label(value: NodeColor | NodeShape | None) -> str:
-    """The name shown for a colour or shape, e.g. "Red" or "Rounded rectangle"."""
+    """The name shown for a colour or shape, e.g. "Red" or "Hexagon"."""
     return value.name.replace("_", " ").capitalize() if value is not None else ""

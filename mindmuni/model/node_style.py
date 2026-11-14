@@ -3,12 +3,12 @@ from enum import Enum
 
 
 class NodeShape(Enum):
-    RECTANGLE = "RECTANGLE"
-    ROUNDED_RECTANGLE = "ROUNDED_RECTANGLE"
+    RECTANGLE = "RECTANGLE"  # drawn with rounded corners
     ELLIPSE = "ELLIPSE"
     DIAMOND = "DIAMOND"
     HEXAGON = "HEXAGON"
     CLOUD = "CLOUD"
+    STAR = "STAR"  # six-pointed star: two overlapping triangles
 
 
 class NodeColor(Enum):
@@ -30,5 +30,5 @@ class NodeColor(Enum):
 
 @dataclass(slots=True)
 class NodeStyle:
-    shape: NodeShape = NodeShape.ROUNDED_RECTANGLE
+    shape: NodeShape = NodeShape.RECTANGLE
     color: NodeColor = NodeColor.BLUE

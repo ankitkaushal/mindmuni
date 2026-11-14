@@ -10,6 +10,8 @@ from mindmuni.utils.clock import now
 from mindmuni.utils.id_generator import new_id
 
 FORMAT_VERSION = 1
+# Shape names from older files, mapped to the shape that replaced them.
+LEGACY_SHAPE_NAMES = {"ROUNDED_RECTANGLE": "RECTANGLE"}
 
 
 class MapFormatError(ValueError):
@@ -141,7 +143,7 @@ class MapSerializer:
     def _style_from_dict(data: dict) -> NodeStyle:
         default = NodeStyle()
         return NodeStyle(
-            shape=NodeShape(data.get("shape", default.shape.value)),
+            shape=NodeShape(LEGACY_SHAPE_NAMES.get(shape_name := data.get("shape", default.shape.value), shape_name)),
             color=NodeColor(data.get("color", default.color.value)),
         )
 

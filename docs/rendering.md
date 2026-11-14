@@ -85,11 +85,17 @@ it puts map point `point` at the window pixel `(window_x, window_y)`.
 
    | Shape | Width × | Height × |
    |-------|---------|----------|
-   | `RECTANGLE`, `ROUNDED_RECTANGLE` | 1.0 | 1.0 |
+   | `RECTANGLE` | 1.0 | 1.0 |
    | `HEXAGON` | 1.15 | 1.0 |
    | `ELLIPSE` | 1.3 | 1.3 |
    | `CLOUD` | 1.4 | 1.4 |
    | `DIAMOND` | 1.7 | 1.7 |
+
+   `STAR` doesn't use a scale. Its triangles must stay equilateral, so
+   `_measure_star` finds the smallest star whose inner hexagon holds the title
+   plus a 4px margin (`shape_geometry.star_box_for_content`). The box is then
+   √3/2 × the point radius on each side horizontally and the point radius
+   vertically. Long titles make big stars.
 
 The result is the node's outer bounding box in map units. Because the size
 depends on the font, **a theme change can change the layout**, which is why
@@ -153,12 +159,15 @@ the whole map.
 child order. It skips the children of collapsed nodes.
 
 ### 5.2 Connectors (drawn first)
-`ConnectorRenderer.draw(parent, parent_size, child, child_size)` draws one
+`ConnectorRenderer.draw(parent, child)` draws one
 smoothed `create_line` per visible parent → child pair, so connectors are
 under the nodes:
 
 - If the child is right of the parent: from the parent's right edge
-  (`x + width/2`) to the child's left edge.
+  (`x + NodeRenderer.edge_half_width(parent)`) to the child's left edge.
+  The edge is where the outline crosses the node's centre height. For every
+  shape that's `width/2`, except the star, whose side corners sit inside its
+  outer points. The collapsed badge sits on the same edge.
 - If it is to the left: from the parent's left edge to the child's right edge.
 - The four control points are start → (mid-x, start-y) → (mid-x, end-y) →
   end. With `smooth=True`, Tk turns them into an S-curve.
@@ -172,16 +181,17 @@ by tag later:
 
 1. **Shape.** Fill is `palette.color_for(node.style.color)`; outline is that
    colour darkened by 30% (`color_utils.darken`). The outline points come from
-   `mindmuni/utils/shape_geometry.py`, all scaled by zoom:
+   `mindmuni/utils/shape_geometry.py`, all scaled by zoom, and
+   `mindmuni/ui/mapping_main/shape_drawing.py` (`draw_shape`) makes the Tk calls:
 
    | Shape | Tk call | Geometry |
    |-------|---------|----------|
-   | `RECTANGLE` | `create_rectangle` | `bounding_box` |
    | `ELLIPSE` | `create_oval` | `bounding_box` |
-   | `ROUNDED_RECTANGLE` | `create_polygon(smooth=True)` | `rounded_rectangle`: each corner point is doubled so the straight edges stay straight after smoothing; radius `10 × zoom` |
+   | `RECTANGLE` | `create_polygon(smooth=True)` | `rounded_rectangle`: each corner point is doubled so the straight edges stay straight after smoothing; radius `10 × zoom` |
    | `DIAMOND` | `create_polygon` | `diamond`: the four edge midpoints |
    | `HEXAGON` | `create_polygon` | `hexagon`: flat top and bottom, slanted sides inset by `0.6 × half_height` |
    | `CLOUD` | `create_polygon(smooth=True)` | `cloud`: 20 points around an ellipse, alternating between full and 86% radius, which smoothing turns into 10 bumps |
+   | `STAR` | `create_polygon` × 4 | `star_triangles`: a yantra-style six-pointed star (shatkona), an upward and a downward equilateral triangle. They are never stretched: the star is the largest that fits the box. Both are filled first, then both are outlined, so all six edges show. |
 
    A selected node's outline uses `palette.selection_outline` instead, at
    `4 × zoom` wide.
@@ -237,6 +247,7 @@ window may not have its final size until Tk has processed pending events.
 | `mindmuni/ui/mapping_main/map_toolbar.py` | `MapToolbar`: the edit toolbar. It is a separate widget placed over the canvas, not drawn on it, so it doesn't scroll or zoom with the map. |
 | `mindmuni/ui/mapping_main/connector_renderer.py` | `ConnectorRenderer`: draws one parent → child curve. |
 | `mindmuni/core/tree_layout.py` | `TreeLayout`, `LayoutSpacing`, `visible_children`: positions, no Tkinter. |
+| `mindmuni/ui/mapping_main/shape_drawing.py` | `draw_shape`: the Tk calls for each shape, shared with the style toolbar. |
 | `mindmuni/utils/shape_geometry.py` | Polygon points for each shape. |
 | `mindmuni/utils/color_utils.py` | Text contrast and outline darkening. |
 | `mindmuni/model/theme.py` | `ThemePalette` (colours, `color_for`) and `FontSettings`. |

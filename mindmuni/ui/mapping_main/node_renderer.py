@@ -5,6 +5,7 @@ from mindmuni.model.geometry import Size
 from mindmuni.model.node import Node
 from mindmuni.model.node_style import NodeShape
 from mindmuni.model.theme import Theme
+from mindmuni.ui.mapping_main.shape_drawing import draw_shape
 from mindmuni.utils import shape_geometry
 from mindmuni.utils.color_utils import contrast_text_color, darken
 
@@ -21,12 +22,12 @@ BADGE_RADIUS = 9
 # Shapes that cut into their bounding box need a bigger box so the title still fits inside.
 SHAPE_SCALE: dict[NodeShape, tuple[float, float]] = {
     NodeShape.RECTANGLE: (1.0, 1.0),
-    NodeShape.ROUNDED_RECTANGLE: (1.0, 1.0),
     NodeShape.ELLIPSE: (1.3, 1.3),
     NodeShape.DIAMOND: (1.7, 1.7),
     NodeShape.HEXAGON: (1.15, 1.0),
     NodeShape.CLOUD: (1.4, 1.4),
 }
+STAR_TEXT_MARGIN = 4  # space between the title and the star's inner hexagon
 
 NODE_TAG = "node"
 NODE_TAG_PREFIX = "node:"
@@ -62,6 +63,8 @@ class NodeRenderer:
 
     def measure(self, node: Node) -> Size:
         text_size = self._measure_title(node.title)
+        if node.style.shape is NodeShape.STAR:
+            return self._measure_star(text_size)
         base_width = max(text_size.width, MIN_TEXT_WIDTH) + 2 * HORIZONTAL_PADDING
         base_height = max(text_size.height + 2 * VERTICAL_PADDING, MIN_NODE_HEIGHT)
         width_scale, height_scale = SHAPE_SCALE[node.style.shape]
@@ -78,6 +81,26 @@ class NodeRenderer:
         if node.collapsed and node.children:
             self._draw_collapsed_badge(node, grows_left, tags)
 
+    def edge_half_width(self, node: Node) -> float:
+        """How far the node's outline reaches left and right of its centre at mid-height, in map units.
+
+        Connectors and the collapsed badge attach there. It is half the box width for every shape except the
+        star, whose mid-height corners sit inside its outer points.
+        """
+        size = self.measure(node)
+        if node.style.shape is NodeShape.STAR:
+            return shape_geometry.star_mid_height_half_width(size.width / 2, size.height / 2)
+        return size.width / 2
+
+    @staticmethod
+    def _measure_star(text_size: Size) -> Size:
+        """Sized so the title fits in the inner hexagon of an unstretched (equilateral) star."""
+        half_width, half_height = shape_geometry.star_box_for_content(
+            max(text_size.width, MIN_TEXT_WIDTH) / 2 + STAR_TEXT_MARGIN,
+            text_size.height / 2 + STAR_TEXT_MARGIN,
+        )
+        return Size(2 * half_width, 2 * half_height)
+
     def _measure_title(self, title: str) -> Size:
         lines = title.splitlines() or [""]
         width = max(self._font.measure(line) for line in lines)
@@ -93,21 +116,10 @@ class NodeRenderer:
             outline, width = self._palette.selection_outline, self._line_width(SELECTED_OUTLINE_WIDTH)
         else:
             outline, width = darken(fill_color, OUTLINE_DARKEN_FRACTION), self._line_width()
-        style = {"fill": fill_color, "outline": outline, "width": width, "tags": tags}
-        match node.style.shape:
-            case NodeShape.RECTANGLE:
-                self._canvas.create_rectangle(*shape_geometry.bounding_box(center_x, center_y, half_width, half_height), **style)
-            case NodeShape.ELLIPSE:
-                self._canvas.create_oval(*shape_geometry.bounding_box(center_x, center_y, half_width, half_height), **style)
-            case NodeShape.ROUNDED_RECTANGLE:
-                points = shape_geometry.rounded_rectangle(center_x, center_y, half_width, half_height, CORNER_RADIUS * zoom)
-                self._canvas.create_polygon(points, smooth=True, **style)
-            case NodeShape.DIAMOND:
-                self._canvas.create_polygon(shape_geometry.diamond(center_x, center_y, half_width, half_height), **style)
-            case NodeShape.HEXAGON:
-                self._canvas.create_polygon(shape_geometry.hexagon(center_x, center_y, half_width, half_height), **style)
-            case NodeShape.CLOUD:
-                self._canvas.create_polygon(shape_geometry.cloud(center_x, center_y, half_width, half_height), smooth=True, **style)
+        draw_shape(
+            self._canvas, node.style.shape, center_x, center_y, half_width, half_height,
+            corner_radius=CORNER_RADIUS * zoom, fill=fill_color, outline=outline, width=width, tags=tags,
+        )
 
     def _draw_title(self, node: Node, fill_color: str, tags: tuple[str, ...]) -> None:
         self._canvas.create_text(
@@ -123,7 +135,7 @@ class NodeRenderer:
     def _draw_collapsed_badge(self, node: Node, grows_left: bool, tags: tuple[str, ...]) -> None:
         zoom = self._zoom
         direction = -1 if grows_left else 1
-        badge_x = (node.position.x + direction * self.measure(node).width / 2) * zoom
+        badge_x = (node.position.x + direction * self.edge_half_width(node)) * zoom
         badge_y = node.position.y * zoom
         radius = BADGE_RADIUS * zoom
         self._canvas.create_oval(

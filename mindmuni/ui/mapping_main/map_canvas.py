@@ -121,7 +121,7 @@ class MapCanvas(tk.Canvas):
         if self._theme is None:
             return
         self._node_renderer = NodeRenderer(self, self._theme, self._zoom)
-        self._connector_renderer = ConnectorRenderer(self, self._theme, self._zoom)
+        self._connector_renderer = ConnectorRenderer(self, self._theme, self._node_renderer, self._zoom)
 
     def _scroll_to(self, point: Point, window_x: float, window_y: float) -> None:
         """Scrolls so the map point (in map units) appears at the window point."""
@@ -135,7 +135,7 @@ class MapCanvas(tk.Canvas):
         connector_renderer = self._connector_renderer
         for parent in iter_visible_nodes(root):
             for child in visible_children(parent):
-                connector_renderer.draw(parent, self.measure_node(parent), child, self.measure_node(child))
+                connector_renderer.draw(parent, child)
 
     def _draw_nodes(self, root: Node) -> None:
         node_renderer = self._require_node_renderer()

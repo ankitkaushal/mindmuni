@@ -32,6 +32,10 @@
                 {
                   "node_id": "shape-ellipse",
                   "title": "Ellipse"
+                },
+                {
+                  "node_id": "shape-star",
+                  "title": "Star"
                 }
               ]
             },
@@ -86,7 +90,7 @@
         "color": "BLUE"
       },
       "mapping": {
-        "shape": "ROUNDED_RECTANGLE",
+        "shape": "RECTANGLE",
         "color": "GREEN"
       },
       "canvas": {
@@ -109,12 +113,16 @@
         "shape": "ELLIPSE",
         "color": "PURPLE"
       },
+      "shape-star": {
+        "shape": "STAR",
+        "color": "AMBER"
+      },
       "shortcuts": {
-        "shape": "ROUNDED_RECTANGLE",
+        "shape": "RECTANGLE",
         "color": "GREEN"
       },
       "editor": {
-        "shape": "ROUNDED_RECTANGLE",
+        "shape": "RECTANGLE",
         "color": "ORANGE"
       },
       "headings": {
