@@ -7,10 +7,12 @@ from mindmuni.core.tree_layout import TreeLayout
 from mindmuni.model.map_style import MapLayout
 from mindmuni.model.mind_map import MindMap
 from mindmuni.model.node import Node
+from mindmuni.model.node_style import NodeColor, NodeShape
 from mindmuni.model.theme import Theme
 from mindmuni.ui.core.view import View
 from mindmuni.ui.mapping_main.map_canvas import MapCanvas
 from mindmuni.ui.mapping_main.map_toolbar import MapToolbar
+from mindmuni.ui.mapping_main.style_toolbar import StyleToolbar
 
 MAP_VIEW_ID = "map"
 
@@ -18,7 +20,8 @@ MAP_VIEW_ID = "map"
 class MappingView(View):
     """Mapping main component: lays out a MindMap, shows it on a scrollable canvas, and edits it.
 
-    The edit toolbar floats over the canvas's bottom-right corner and stays there when the window is resized.
+    The edit toolbar floats over the canvas's bottom-right corner and the style toolbar (colour and shape)
+    over its bottom-left corner; both stay there when the window is resized.
     """
 
     def __init__(
@@ -33,6 +36,8 @@ class MappingView(View):
         self._layout = TreeLayout(self._canvas.measure_node)
         self._toolbar = MapToolbar(self, on_insert=self.insert_node, on_delete=self.delete_selected_node)
         self._toolbar.pin_to(self._canvas)
+        self._style_toolbar = StyleToolbar(self, on_color=self.set_selected_color, on_shape=self.set_selected_shape)
+        self._style_toolbar.pin_to(self._canvas)
         self.apply_theme(theme)
 
     def show_map(self, mind_map: MindMap) -> None:
@@ -73,6 +78,23 @@ class MappingView(View):
         self._selection.select(parent.node_id)
         self._redraw_keeping_in_place(parent, anchor)
 
+    def set_selected_color(self, color: NodeColor) -> None:
+        """Changes the selected node's colour. Sizes don't change, so the map is only redrawn."""
+        selected = self._selected_node()
+        if selected is None or not self._editor.set_color(self._mind_map, selected.node_id, color):
+            return
+        self._canvas.draw_map(self._mind_map, selected.node_id)
+        self._update_toolbar()
+
+    def set_selected_shape(self, shape: NodeShape) -> None:
+        """Changes the selected node's shape. Its size can change, so the layout runs again with the node kept in place."""
+        selected = self._selected_node()
+        if selected is None:
+            return
+        anchor = self._canvas.window_point_of(selected.position)
+        if self._editor.set_shape(self._mind_map, selected.node_id, shape):
+            self._redraw_keeping_in_place(selected, anchor)
+
     # --- zoom ---------------------------------------------------------------
 
     def zoom_in(self) -> None:
@@ -91,6 +113,7 @@ class MappingView(View):
     def apply_theme(self, theme: Theme) -> None:
         self._canvas.apply_theme(theme)
         self._toolbar.apply_theme(theme)
+        self._style_toolbar.apply_theme(theme)
         self._redraw()  # fonts may change, so node sizes and layout change too
 
     # --- internals ----------------------------------------------------------
@@ -125,6 +148,10 @@ class MappingView(View):
         selected = self._selected_node()
         can_delete = selected is not None and self._editor.can_delete(self._mind_map, selected.node_id)
         self._toolbar.set_enabled(insert=selected is not None, delete=can_delete)
+        if selected is None:
+            self._style_toolbar.show_style(None, None)
+        else:
+            self._style_toolbar.show_style(selected.style.color, selected.style.shape)
 
     def _create_scrollable_canvas(self) -> MapCanvas:
         canvas = MapCanvas(self)

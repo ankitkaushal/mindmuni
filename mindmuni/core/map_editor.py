@@ -1,5 +1,6 @@
 from mindmuni.model.mind_map import MindMap
 from mindmuni.model.node import Node
+from mindmuni.model.node_style import NodeColor, NodeShape
 
 NEW_NODE_TITLE = "New node"
 
@@ -26,6 +27,24 @@ class MapEditor:
         parent.remove_child(node_id)
         mind_map.touch()
         return parent
+
+    def set_color(self, mind_map: MindMap, node_id: str, color: NodeColor) -> bool:
+        """Sets the node's colour. Returns whether anything changed."""
+        node = self._require_node(mind_map, node_id)
+        if node.style.color is color:
+            return False
+        node.style.color = color
+        mind_map.touch()
+        return True
+
+    def set_shape(self, mind_map: MindMap, node_id: str, shape: NodeShape) -> bool:
+        """Sets the node's shape. Returns whether anything changed (a new shape can change the node's size)."""
+        node = self._require_node(mind_map, node_id)
+        if node.style.shape is shape:
+            return False
+        node.style.shape = shape
+        mind_map.touch()
+        return True
 
     @staticmethod
     def can_delete(mind_map: MindMap, node_id: str) -> bool:

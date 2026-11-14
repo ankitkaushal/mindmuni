@@ -4,7 +4,7 @@ Loads the hard-coded map file below and draws it.
 Keys: T toggles light/dark theme, L toggles right/balanced layout, R reloads the file from disk,
 Ctrl+plus / Ctrl+minus zoom in and out, Ctrl+0 resets the zoom,
 Insert adds a child to the selected node, Delete deletes the selected node (edits are not saved).
-Mouse: click a node to select it, drag empty space (or middle-drag) to pan, wheel to scroll
+Mouse: click a node to select it, use the bottom-left toolbar to change its colour and shape, drag empty space (or middle-drag) to pan, wheel to scroll
 (Shift+wheel scrolls sideways, Ctrl+wheel zooms around the pointer).
 """
 
