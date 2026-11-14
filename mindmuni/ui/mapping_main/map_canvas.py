@@ -52,6 +52,7 @@ class MapCanvas(tk.Canvas):
         self._on_node_click: NodeClickHandler = lambda _node_id: None
         self._on_node_double_click: NodeDoubleClickHandler = lambda _node_id: None
         self._on_before_zoom: Callable[[], None] = lambda: None
+        self._on_zoom_changed: Callable[[], None] = lambda: None
         self._press_point: tuple[int, int] | None = None  # where an empty-space left press started, for panning
         self._node_renderer: NodeRenderer | None = None
         self._connector_renderer: ConnectorRenderer | None = None
@@ -61,6 +62,14 @@ class MapCanvas(tk.Canvas):
     @property
     def zoom(self) -> float:
         return self._zoom
+
+    @property
+    def can_zoom_in(self) -> bool:
+        return self._zoom < MAX_ZOOM
+
+    @property
+    def can_zoom_out(self) -> bool:
+        return self._zoom > MIN_ZOOM
 
     def apply_theme(self, theme: Theme) -> None:
         self._theme = theme
@@ -82,6 +91,10 @@ class MapCanvas(tk.Canvas):
     def on_before_zoom(self, handler: Callable[[], None]) -> None:
         """handler() runs before every zoom change, while the map is still drawn at the old zoom."""
         self._on_before_zoom = handler
+
+    def on_zoom_changed(self, handler: Callable[[], None]) -> None:
+        """handler() runs after every zoom change, however it was made (buttons, keys or Ctrl+wheel)."""
+        self._on_zoom_changed = handler
 
     def draw_map(self, mind_map: MindMap, selected_id: str | None = None) -> None:
         self._mind_map = mind_map
@@ -129,6 +142,7 @@ class MapCanvas(tk.Canvas):
         if self._mind_map is not None:
             self.draw_map(self._mind_map, self._selected_id)
             self._scroll_to(anchor, anchor_x, anchor_y)
+        self._on_zoom_changed()
 
     def _build_renderers(self) -> None:
         if self._theme is None:

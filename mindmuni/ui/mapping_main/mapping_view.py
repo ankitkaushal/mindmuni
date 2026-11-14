@@ -14,6 +14,7 @@ from mindmuni.ui.mapping_main.map_canvas import MapCanvas
 from mindmuni.ui.mapping_main.map_toolbar import MapToolbar
 from mindmuni.ui.mapping_main.style_toolbar import StyleToolbar
 from mindmuni.ui.mapping_main.title_editor import TitleEditor
+from mindmuni.ui.mapping_main.zoom_toolbar import ZoomToolbar
 
 MAP_VIEW_ID = "map"
 
@@ -21,8 +22,8 @@ MAP_VIEW_ID = "map"
 class MappingView(View):
     """Mapping main component: lays out a MindMap, shows it on a scrollable canvas, and edits it.
 
-    The edit toolbar floats over the canvas's bottom-right corner and the style toolbar (colour and shape)
-    over its bottom-left corner; both stay there when the window is resized.
+    The edit toolbar floats over the canvas's bottom-right corner, the style toolbar (colour and shape) over its
+    bottom-left corner and the zoom toolbar over its top-right corner; all stay there when the window is resized.
 
     A node's title is edited in place (double-click, F2 or the Edit button), by typing into its drawn text.
     Every action that redraws first stops editing and saves what was typed, because a redraw replaces that text.
@@ -39,6 +40,7 @@ class MappingView(View):
         self._canvas.on_node_click(self._on_node_click)
         self._canvas.on_node_double_click(self._on_node_double_click)
         self._canvas.on_before_zoom(self._finish_editing)
+        self._canvas.on_zoom_changed(self._update_zoom_toolbar)
         self._layout = TreeLayout(self._canvas.measure_node)
         self._title_editor = TitleEditor(self._canvas, on_commit=self._rename_node)
         self._toolbar = MapToolbar(
@@ -47,6 +49,11 @@ class MappingView(View):
         self._toolbar.pin_to(self._canvas)
         self._style_toolbar = StyleToolbar(self, on_color=self.set_selected_color, on_shape=self.set_selected_shape)
         self._style_toolbar.pin_to(self._canvas)
+        self._zoom_toolbar = ZoomToolbar(
+            self, on_zoom_out=self.zoom_out, on_reset=self.reset_zoom, on_zoom_in=self.zoom_in
+        )
+        self._zoom_toolbar.pin_to(self._canvas)
+        self._update_zoom_toolbar()
         self._theme = theme
         self.apply_theme(theme)
 
@@ -141,6 +148,7 @@ class MappingView(View):
         self._canvas.apply_theme(theme)
         self._toolbar.apply_theme(theme)
         self._style_toolbar.apply_theme(theme)
+        self._zoom_toolbar.apply_theme(theme)
         self._redraw()  # fonts may change, so node sizes and layout change too
 
     # --- internals ----------------------------------------------------------
@@ -193,6 +201,10 @@ class MappingView(View):
         """
         self._redraw()
         self._canvas.scroll_point_to(node.position, *window_point)
+
+    def _update_zoom_toolbar(self) -> None:
+        canvas = self._canvas
+        self._zoom_toolbar.show_zoom(canvas.zoom, can_zoom_out=canvas.can_zoom_out, can_zoom_in=canvas.can_zoom_in)
 
     def _update_toolbar(self) -> None:
         selected = self._selected_node()
