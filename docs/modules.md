@@ -73,7 +73,7 @@ MindMuni/
     │   │   ├── connector_renderer.py
     │   │   ├── map_toolbar.py      # MapToolbar
     │   │   ├── style_toolbar.py    # StyleToolbar (colour and shape picker)
-    │   │   ├── zoom_toolbar.py     # ZoomToolbar (zoom out, percentage/reset, zoom in)
+    │   │   ├── view_toolbar.py     # ViewToolbar (zoom out, percentage/reset, zoom in, drag lock)
     │   │   ├── title_editor.py     # TitleEditor (in-place title editing)
     │   │   └── shape_drawing.py    # draw_shape, shared by NodeRenderer and StyleToolbar
     │   │

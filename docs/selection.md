@@ -25,7 +25,7 @@ mouse press on canvas
   MapCanvas._on_left_press
     _node_id_at(x, y)                     hit-test: topmost item tagged "node:<id>"
       ├─ node found  ─► on_node_click(node_id)
-      └─ empty space ─► start a pan;  on release within 3px ─► on_node_click(None)
+      └─ empty space ─► start a pan (if dragging is on);  on release within 3px ─► on_node_click(None)
 
 MappingView._on_node_click(node_id)
   same as current selection? ─► do nothing
@@ -89,9 +89,9 @@ tell a click from a pan:
 | Press lands on | What happens |
 |----------------|--------------|
 | A node | `on_node_click(node_id)` is called immediately. No pan starts, so dragging a node does nothing (yet). |
-| Empty space | A pan starts (`scan_mark`), and `_press_point` remembers where. Dragging calls `scan_dragto`. On release, if the pointer moved no more than `CLICK_TOLERANCE` (3px) in each direction, it counts as a click and `on_node_click(None)` is called, which clears the selection. A real drag pans and leaves the selection alone. |
+| Empty space | A pan starts (`scan_mark`), and `_press_point` remembers where. Dragging calls `scan_dragto`, but only while dragging is allowed (`MapCanvas.drag_enabled`, off by default and toggled by the view toolbar's **Drag** button); when it's locked, the pointer can move without panning. On release, if the pointer moved no more than `CLICK_TOLERANCE` (3px) in each direction, it counts as a click and `on_node_click(None)` is called, which clears the selection. A real drag pans and leaves the selection alone. |
 
-Middle-button drag always pans and never changes the selection.
+Middle-button drag pans only while dragging is allowed, and never changes the selection.
 
 `MapCanvas` doesn't decide what a click means; it only reports it through
 the handler registered with `on_node_click(handler)`. `MappingView` registers

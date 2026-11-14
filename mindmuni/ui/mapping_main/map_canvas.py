@@ -39,8 +39,9 @@ class MapCanvas(tk.Canvas):
     Zooming only redraws, it never re-runs the layout or changes Node.position.
 
     Left-click on a node reports its id to the click handler, and a double-click on a node reports it to the
-    double-click handler. Left-drag on empty space (or middle-drag anywhere) pans; a left-click on empty space
-    without dragging reports None.
+    double-click handler. A left-click on empty space without dragging reports None. Dragging the map around
+    (left-drag on empty space, or middle-drag anywhere) is off until set_drag_enabled(True); the scrollbars and
+    the mouse wheel always work.
     """
 
     def __init__(self, parent: tk.Misc) -> None:
@@ -53,7 +54,8 @@ class MapCanvas(tk.Canvas):
         self._on_node_double_click: NodeDoubleClickHandler = lambda _node_id: None
         self._on_before_zoom: Callable[[], None] = lambda: None
         self._on_zoom_changed: Callable[[], None] = lambda: None
-        self._press_point: tuple[int, int] | None = None  # where an empty-space left press started, for panning
+        self._press_point: tuple[int, int] | None = None  # where an empty-space left press started
+        self._drag_enabled = False
         self._node_renderer: NodeRenderer | None = None
         self._connector_renderer: ConnectorRenderer | None = None
         self._bind_panning()
@@ -62,6 +64,14 @@ class MapCanvas(tk.Canvas):
     @property
     def zoom(self) -> float:
         return self._zoom
+
+    @property
+    def drag_enabled(self) -> bool:
+        return self._drag_enabled
+
+    def set_drag_enabled(self, enabled: bool) -> None:
+        """Allows or locks dragging the map around with the mouse. Locked by default."""
+        self._drag_enabled = enabled
 
     @property
     def can_zoom_in(self) -> bool:
@@ -189,8 +199,8 @@ class MapCanvas(tk.Canvas):
         self.bind("<Double-Button-1>", self._on_double_click)
         self.bind("<B1-Motion>", self._on_left_drag)
         self.bind("<ButtonRelease-1>", self._on_left_release)
-        self.bind("<ButtonPress-2>", lambda event: self.scan_mark(event.x, event.y))
-        self.bind("<B2-Motion>", lambda event: self.scan_dragto(event.x, event.y, gain=1))
+        self.bind("<ButtonPress-2>", self._on_middle_press)
+        self.bind("<B2-Motion>", self._on_middle_drag)
 
     def _on_left_press(self, event: tk.Event) -> None:
         node_id = self._node_id_at(event.x, event.y)
@@ -198,7 +208,7 @@ class MapCanvas(tk.Canvas):
             self._press_point = None
             self._on_node_click(node_id)
             return
-        self._press_point = (event.x, event.y)
+        self._press_point = (event.x, event.y)  # still needed when dragging is locked, to detect a click
         self.scan_mark(event.x, event.y)
 
     def _on_double_click(self, event: tk.Event) -> None:
@@ -207,7 +217,14 @@ class MapCanvas(tk.Canvas):
             self._on_node_double_click(node_id)
 
     def _on_left_drag(self, event: tk.Event) -> None:
-        if self._press_point is not None:
+        if self._press_point is not None and self._drag_enabled:
+            self.scan_dragto(event.x, event.y, gain=1)
+
+    def _on_middle_press(self, event: tk.Event) -> None:
+        self.scan_mark(event.x, event.y)
+
+    def _on_middle_drag(self, event: tk.Event) -> None:
+        if self._drag_enabled:
             self.scan_dragto(event.x, event.y, gain=1)
 
     def _on_left_release(self, event: tk.Event) -> None:
