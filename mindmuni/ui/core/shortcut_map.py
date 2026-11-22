@@ -26,6 +26,9 @@ class ShortcutMap:
     INSERT_NODE = Shortcut(("<Insert>", "<KP_Insert>"), "Insert")
     EDIT_TITLE = Shortcut(("<F2>",), "F2")
     DELETE_NODE = Shortcut(("<Delete>", "<KP_Delete>"), "Delete")
+    HEADING_1 = Shortcut(("<Control-Key-1>", "<Control-KP_1>"), "Ctrl+1")
+    HEADING_2 = Shortcut(("<Control-Key-2>", "<Control-KP_2>"), "Ctrl+2")
+    NORMAL_TEXT = Shortcut(("<Control-Key-0>", "<Control-KP_0>"), "Ctrl+0")
 
     @staticmethod
     def bind_global(root: tk.Tk, shortcut: Shortcut, action: Callable[[], None]) -> None:
