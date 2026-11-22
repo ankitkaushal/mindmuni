@@ -268,13 +268,18 @@ MappingView (grid)
   (weight 1) takes any change.
 - **Closing:** hides the border and editor with `grid_remove()` and narrows the
   window on its right by their width, so everything is back where it was.
-- **Holding the map's scroll:** when the text column is removed, the canvas is
-  briefly as wide as the old, wider window (until the window manager narrows
-  it). That's wider than the map's scroll region, which makes Tk snap the view
-  to the region's edge. So `_widen_window()` notes the map point at the canvas's
-  top-left (`MapCanvas.map_point_at(0, 0)`) and, for `KEEP_MAP_STILL_MS`
-  (500 ms), scrolls it back there (`scroll_point_to()`) on every canvas
-  `<Configure>`.
+- **Pinning the map's width while the window resizes:** the window manager
+  resizes the window a moment after `geometry()` asks it to. If the map's
+  column could stretch in the meantime, opening would lay the text area out
+  inside the old window, over the right of the map (a white flash), and closing
+  would briefly stretch the map into the space the text left (which also made
+  Tk snap the map to its scroll region's edge). So `_pin_map_width()` sets the
+  map's column to weight 0 with `minsize` at its current width first. Until
+  the window has resized, the text area is laid out past the window's right
+  edge, out of sight, and the map's size never changes. `_on_resized()`
+  unpins the column (weight 1, no `minsize`) when the view reaches the width
+  `_widen_window()` expects. It also unpins after `RESIZE_TIMEOUT_MS` (1 s),
+  in case the window manager doesn't resize the window as asked.
 - **Which note:** `MappingView` remembers the node whose note is shown
   (`_note_node_id`). `_show_selected_note()` runs after every selection change
   (`show_map`, a node click, `insert_node`, `delete_selected_node`) and loads

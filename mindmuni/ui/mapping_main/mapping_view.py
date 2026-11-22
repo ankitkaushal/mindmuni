@@ -4,7 +4,6 @@ from tkinter import ttk
 from mindmuni.core.map_editor import MapEditor
 from mindmuni.core.selection_manager import SelectionManager
 from mindmuni.core.tree_layout import TreeLayout
-from mindmuni.model.geometry import Point
 from mindmuni.model.map_style import MapLayout
 from mindmuni.model.mind_map import MindMap
 from mindmuni.model.node import Node
@@ -21,7 +20,7 @@ from mindmuni.ui.text_editor.text_editor_view import TextEditorView
 MAP_VIEW_ID = "map"
 TEXT_TO_MAP_WIDTH = 1 / 3  # the text area opens a third as wide as the map
 TEXT_BORDER_WIDTH = 1
-KEEP_MAP_STILL_MS = 500  # how long after opening or closing the text area the map's scroll is held
+RESIZE_TIMEOUT_MS = 1000  # the map's width is freed by then even if the window manager never resized the window
 CANVAS_COLUMN, TEXT_BORDER_COLUMN, TEXT_COLUMN = 0, 2, 3  # column 1 is the map's vertical scrollbar
 
 
@@ -77,9 +76,9 @@ class MappingView(View):
         self._text_border = tk.Frame(self, width=TEXT_BORDER_WIDTH, borderwidth=0)
         self._text_open = False
         self._note_node_id: str | None = None  # the node whose note the text area shows
-        self._held_scroll: Point | None = None  # the map point kept at the canvas's top-left while the window resizes
-        self._release_scroll_job: str | None = None
-        self._canvas.bind("<Configure>", lambda _event: self._reapply_held_scroll(), add="+")
+        self._resize_target: int | None = None  # this view's width once the window has resized, while waiting
+        self._unpin_job: str | None = None
+        self.bind("<Configure>", self._on_resized, add="+")
         self._update_view_toolbar()
         self._theme = theme
         self.apply_theme(theme)
@@ -210,6 +209,7 @@ class MappingView(View):
             return
         self.finish_editing()
         self.update_idletasks()  # current widths, for resizing the window
+        self._pin_map_width()
         self._text_open = is_open
         if is_open:
             text_width = round(self._canvas.winfo_width() * TEXT_TO_MAP_WIDTH)
@@ -275,29 +275,38 @@ class MappingView(View):
     def _widen_window(self, extra: int) -> None:
         """Makes the window `extra` pixels wider (narrower if negative) on its right, keeping its position and
         height, so everything already in it stays put. It doesn't grow past the screen's right edge; if it can't
-        grow enough, the map gives up the rest.
-
-        The map's scroll is held for a moment: closing the text area makes the canvas briefly wider than the map's
-        scroll region (until the window manager narrows the window), and Tk would then snap the view to the
-        region's edge. The scroll is re-applied each time the canvas resizes until then.
-        """
-        self._held_scroll = self._canvas.map_point_at(0, 0)
+        grow enough, the map gives up the rest once its width is unpinned."""
         window = self.winfo_toplevel()
         width = window.winfo_width() + extra
         if extra > 0:
             width = min(width, window.winfo_screenwidth() - window.winfo_rootx())
-        window.geometry(f"{max(width, 1)}x{window.winfo_height()}")
-        if self._release_scroll_job is not None:
-            self.after_cancel(self._release_scroll_job)
-        self._release_scroll_job = self.after(KEEP_MAP_STILL_MS, self._release_held_scroll)
+        width = max(width, 1)
+        self._resize_target = self.winfo_width() + width - window.winfo_width()
+        window.geometry(f"{width}x{window.winfo_height()}")
 
-    def _reapply_held_scroll(self) -> None:
-        if self._held_scroll is not None:
-            self._canvas.scroll_point_to(self._held_scroll, 0, 0)
+    def _pin_map_width(self) -> None:
+        """Holds the map's column at its current width until the window has resized (see _on_resized()).
 
-    def _release_held_scroll(self) -> None:
-        self._held_scroll = None
-        self._release_scroll_job = None
+        The window manager resizes the window a moment after it's asked to. Meanwhile the text area is laid out
+        past the window's right edge, out of sight, instead of taking the map's space (which flashed white), and
+        on closing the map doesn't stretch into the space the text area leaves.
+        """
+        self.columnconfigure(CANVAS_COLUMN, weight=0, minsize=self._canvas.winfo_width())
+        if self._unpin_job is not None:
+            self.after_cancel(self._unpin_job)
+        self._unpin_job = self.after(RESIZE_TIMEOUT_MS, self._unpin_map_width)
+
+    def _unpin_map_width(self) -> None:
+        """Lets the map's column take any change in the window's width again."""
+        self.columnconfigure(CANVAS_COLUMN, weight=1, minsize=0)
+        self._resize_target = None
+        if self._unpin_job is not None:
+            self.after_cancel(self._unpin_job)
+            self._unpin_job = None
+
+    def _on_resized(self, event: tk.Event) -> None:
+        if self._resize_target is not None and event.width == self._resize_target:
+            self._unpin_map_width()
 
     def _show_selected_note(self, focus: bool = False) -> None:
         """Shows the selected node's note in the text area, if it is open and the node isn't already shown.

@@ -122,10 +122,6 @@ class MapCanvas(tk.Canvas):
         """Where the map point (in map units) currently appears in the window, in window pixels."""
         return point.x * self._zoom - self.canvasx(0), point.y * self._zoom - self.canvasy(0)
 
-    def map_point_at(self, window_x: float, window_y: float) -> Point:
-        """The map point (in map units) currently shown at the window point; the inverse of window_point_of()."""
-        return Point(self.canvasx(window_x) / self._zoom, self.canvasy(window_y) / self._zoom)
-
     def scroll_point_to(self, point: Point, window_x: float, window_y: float) -> None:
         """Scrolls so the map point (in map units) appears at the window point, e.g. to undo a layout shift."""
         self._scroll_to(point, window_x, window_y)
