@@ -27,6 +27,7 @@ class MappingView(View):
     when the window is resized. Dragging the map around is locked until the view toolbar's Drag button turns it on.
 
     A node's title is edited in place (double-click, F2 or the Edit button), by typing into its drawn text.
+    The Edit button is disabled while a title is being edited.
     Every action that redraws first stops editing and saves what was typed, because a redraw replaces that text.
     """
 
@@ -43,7 +44,9 @@ class MappingView(View):
         self._canvas.on_before_zoom(self._finish_editing)
         self._canvas.on_zoom_changed(self._update_view_toolbar)
         self._layout = TreeLayout(self._canvas.measure_node)
-        self._title_editor = TitleEditor(self._canvas, on_commit=self._rename_node)
+        self._title_editor = TitleEditor(
+            self._canvas, on_commit=self._rename_node, on_editing_changed=lambda _editing: self._update_toolbar()
+        )
         self._toolbar = MapToolbar(
             self, on_insert=self.insert_node, on_edit=self.edit_selected_title, on_delete=self.delete_selected_node
         )
@@ -229,7 +232,8 @@ class MappingView(View):
     def _update_toolbar(self) -> None:
         selected = self._selected_node()
         can_delete = selected is not None and self._editor.can_delete(self._mind_map, selected.node_id)
-        self._toolbar.set_enabled(insert=selected is not None, edit=selected is not None, delete=can_delete)
+        can_edit = selected is not None and not self._title_editor.is_editing
+        self._toolbar.set_enabled(insert=selected is not None, edit=can_edit, delete=can_delete)
         if selected is None:
             self._style_toolbar.show_style(None, None)
         else:

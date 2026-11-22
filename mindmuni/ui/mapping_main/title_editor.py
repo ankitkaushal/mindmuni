@@ -12,6 +12,7 @@ SHIFT_MASK = 0x0001
 ALT_MASK = 0x0008
 
 TitleCommitHandler = Callable[[str, str], None]  # (node_id, new_title)
+EditingChangedHandler = Callable[[bool], None]  # (is_editing)
 
 
 class TitleEditor:
@@ -22,13 +23,19 @@ class TitleEditor:
     Enter saves, Shift+Enter starts a new line, Escape cancels. Ctrl/Alt shortcuts save first and then run.
 
     It never changes the node itself: a save calls on_commit(node_id, title), and only when the title actually
-    changed and isn't blank. The text item belongs to the current drawing, so the owner must call finish()
+    changed and isn't blank. on_editing_changed(is_editing) is called whenever editing starts or stops. The text item belongs to the current drawing, so the owner must call finish()
     before anything redraws the canvas.
     """
 
-    def __init__(self, canvas: tk.Canvas, on_commit: TitleCommitHandler) -> None:
+    def __init__(
+        self,
+        canvas: tk.Canvas,
+        on_commit: TitleCommitHandler,
+        on_editing_changed: EditingChangedHandler | None = None,
+    ) -> None:
         self._canvas = canvas
         self._on_commit = on_commit
+        self._on_editing_changed = on_editing_changed
         self._item: int | None = None
         self._last_item: int | None = None
         self._node_id: str | None = None
@@ -67,6 +74,7 @@ class TitleEditor:
         canvas.icursor(item, "end")
         if select_all:
             self._select_all()
+        self._notify_editing_changed()
 
     def finish(self) -> None:
         """Stops editing and saves the title, if it changed and isn't blank."""
@@ -96,6 +104,11 @@ class TitleEditor:
         canvas.unbind("<KeyPress>")
         canvas.bindtags(self._saved_bindtags)
         self._last_item, self._item = self._item, None
+        self._notify_editing_changed()
+
+    def _notify_editing_changed(self) -> None:
+        if self._on_editing_changed is not None:
+            self._on_editing_changed(self.is_editing)
 
     def _restore_text(self, title: str) -> None:
         """Puts a title back on the item (after a cancel, or a blank or unchanged edit)."""
