@@ -60,6 +60,7 @@ Styling that applies to the whole map rather than to one node.
 | Attribute | Type        | Notes                                                        |
 |-----------|-------------|--------------------------------------------------------------|
 | `layout`  | `MapLayout` | `RIGHT` (all branches to the right of the root, the default) or `BALANCED` (the root's branches split between left and right) |
+| `zoom`    | `float`     | How far the map is zoomed in: `1.0` is 100%. Kept in step with the canvas and restored when the map is shown; the canvas clamps it to 0.25–3.0 |
 
 ### `Node`
 One idea in the map.
@@ -205,7 +206,7 @@ whose `node_id` is not in the map are ignored.
     }
   },
   {
-    "map": { "layout": "BALANCED" },
+    "map": { "layout": "BALANCED", "zoom": 1.0 },
     "nodes": {
       "a1…": {
         "shape": "ELLIPSE",

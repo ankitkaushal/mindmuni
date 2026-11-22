@@ -17,6 +17,7 @@ SHAPES = {"RECTANGLE", "ELLIPSE", "DIAMOND", "HEXAGON", "CLOUD", "STAR"}
 COLORS = ["RED", "ORANGE", "AMBER", "YELLOW", "LIME", "GREEN", "TEAL", "CYAN", "BLUE", "INDIGO", "PURPLE", "PINK"]
 BRANCH_COLORS = ["RED", "ORANGE", "AMBER", "GREEN", "TEAL", "CYAN", "BLUE", "PURPLE", "PINK", "LIME", "YELLOW"]
 LAYOUTS = {"RIGHT", "BALANCED"}
+MIN_ZOOM, MAX_ZOOM = 0.25, 3.0
 BLOCK_TYPES = {"HEADING_1", "HEADING_2", "PARAGRAPH"}
 TIME_FORMAT = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$")
 INLINE = re.compile(r"(\*\*==.+?==\*\*|==\*\*.+?\*\*==|\*\*.+?\*\*|==.+?==)")
@@ -87,7 +88,7 @@ def build(outline: dict) -> list:
             "updated_at": stamp,
             "root": tree,
         },
-        {"map": {"layout": outline.get("layout", "RIGHT")}, "nodes": styles},
+        {"map": {"layout": outline.get("layout", "RIGHT"), "zoom": float(outline.get("zoom", 1.0))}, "nodes": styles},
         {"notes": notes},
     ]
 
@@ -134,6 +135,9 @@ def validate(document) -> list[str]:
 
     if style.get("map", {}).get("layout", "RIGHT") not in LAYOUTS:
         errors.append(f"map.layout must be one of {sorted(LAYOUTS)}")
+    zoom = style.get("map", {}).get("zoom", 1.0)
+    if isinstance(zoom, bool) or not isinstance(zoom, (int, float)) or not MIN_ZOOM <= zoom <= MAX_ZOOM:
+        errors.append(f"map.zoom must be a number from {MIN_ZOOM} to {MAX_ZOOM} (1.0 is 100%)")
     node_styles = style.get("nodes", {})
     for node_id in id_set - set(node_styles):
         errors.append(f"style: no entry for node '{node_id}'")

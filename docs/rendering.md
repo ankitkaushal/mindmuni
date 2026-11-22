@@ -217,7 +217,7 @@ bounding box of everything drawn plus `SCROLL_MARGIN` (120) on every side.
 
 | Trigger | Measure | Layout | Draw | Scroll afterwards |
 |---------|:-------:|:------:|:----:|-------------------|
-| `MappingView.show_map(map)` | ✓ | ✓ | ✓ | Centre on the root |
+| `MappingView.show_map(map)` (zoom set first from `MapStyle.zoom` by `MapCanvas.restore_zoom`) | ✓ | ✓ | ✓ | Centre on the root |
 | `MappingView.set_layout(layout)` | ✓ | ✓ | ✓ | Centre on the root |
 | `MappingView.apply_theme(theme)` | ✓ | ✓ | ✓ | Unchanged |
 | `MapCanvas.set_zoom(...)` (wheel, `Ctrl` `+`/`-`/`0`) | — | — | ✓ | Keep the anchor point fixed |
@@ -230,7 +230,8 @@ builds new `NodeRenderer` and `ConnectorRenderer` objects (they hold the
 palette and fonts). On a zoom change, `set_zoom` also rebuilds the renderers
 (they hold the zoom and the zoomed fonts), redraws, then scrolls so the map
 point that was under the anchor (the mouse pointer, or the window centre) is
-still under it. Zoom is clamped to 25%–300%.
+still under it. Zoom is clamped to 25%–300%. After every zoom change
+`MappingView` copies the zoom into `MapStyle.zoom`, so it is saved with the map.
 
 `show_map` and `set_layout` centre on the root with `after_idle`, because the
 window may not have its final size until Tk has processed pending events.

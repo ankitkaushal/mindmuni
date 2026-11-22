@@ -21,7 +21,7 @@ class MapSerializer:
 
     A .mson document is a JSON list of three sections:
       [0] map   - map metadata and the node tree (node ids, titles, children)
-      [1] style - how the map looks: "map" holds map-wide styling (layout),
+      [1] style - how the map looks: "map" holds map-wide styling (layout, zoom),
                   "nodes" holds per-node styling keyed by node_id
                   (shape, color, position, collapsed)
       [2] text  - each node's rich-text note, keyed by node_id
@@ -52,7 +52,7 @@ class MapSerializer:
     @staticmethod
     def _style_section(mind_map: MindMap) -> dict:
         return {
-            "map": {"layout": mind_map.style.layout.value},
+            "map": {"layout": mind_map.style.layout.value, "zoom": mind_map.style.zoom},
             "nodes": {
                 node.node_id: {
                     "shape": node.style.shape.value,
@@ -135,7 +135,10 @@ class MapSerializer:
     @staticmethod
     def _map_style_from_dict(data: dict) -> MapStyle:
         default = MapStyle()
-        return MapStyle(layout=MapLayout(data.get("layout", default.layout.value)))
+        return MapStyle(
+            layout=MapLayout(data.get("layout", default.layout.value)),
+            zoom=float(data.get("zoom", default.zoom)),
+        )
 
     @staticmethod
     def _style_from_dict(data: dict) -> NodeStyle:

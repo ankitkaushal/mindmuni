@@ -12,3 +12,4 @@ class MapStyle:
     """Styling that applies to the whole map rather than to a single node."""
 
     layout: MapLayout = MapLayout.RIGHT
+    zoom: float = 1.0  # 1.0 is 100%; the canvas keeps it within its zoom limits

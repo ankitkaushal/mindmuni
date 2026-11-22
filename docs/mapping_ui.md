@@ -74,7 +74,9 @@ Edits only change the map in memory: nothing is saved, and `R` throws them
 away by reloading the file.
 
 Zoom goes from 25% to 300%, 1.2× per step. It only changes how the map is
-drawn: node positions, the layout and the saved file are not affected.
+drawn: node positions and the layout are not affected. The zoom is part of
+the map (`MapStyle.zoom`), so it is saved in the file and the map opens at
+the zoom it was saved with.
 
 ### When something goes wrong
 | Symptom | Cause |

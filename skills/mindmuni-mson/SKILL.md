@@ -62,7 +62,7 @@ Sections 1 and 2 are optional: if one is missing, the app uses default styling a
 
 ```json
 {
-  "map": { "layout": "BALANCED" },
+  "map": { "layout": "BALANCED", "zoom": 1.0 },
   "nodes": {
     "root": {
       "shape": "ELLIPSE",
@@ -81,6 +81,7 @@ Sections 1 and 2 are optional: if one is missing, the app uses default styling a
 ```
 
 - `map.layout`: `"RIGHT"` (every branch grows to the right of the root, which is the default) or `"BALANCED"` (the root's branches are split between its left and right). Use `BALANCED` when the root has 4 or more branches.
+- `map.zoom`: how far the map is zoomed in when it opens, as a number: `1.0` is 100%, `0.75` is 75%. The app keeps it between `0.25` and `3.0`. Use `1.0` unless the map is very large (around 60 nodes or more), where `0.75` lets more of it fit on screen. Optional; defaults to `1.0`.
 - `nodes`: one entry per node, keyed by `node_id`. Write an entry for **every** node.
   - `shape`: one of `RECTANGLE` (default, rounded corners), `ELLIPSE`, `DIAMOND`, `HEXAGON`, `CLOUD`, `STAR`.
   - `color`: one of `RED`, `ORANGE`, `AMBER`, `YELLOW`, `LIME`, `GREEN`, `TEAL`, `CYAN`, `BLUE` (default), `INDIGO`, `PURPLE`, `PINK`. These are colour *names*; the app's theme picks the actual hex values.
@@ -156,6 +157,7 @@ Values are **case-sensitive and must be upper case**. Any value not in these lis
 {
   "title": "CISSP Domains",
   "layout": "BALANCED",
+  "zoom": 1.0,
   "root": {
     "id": "root",
     "title": "CISSP",
@@ -178,6 +180,7 @@ Values are **case-sensitive and must be upper case**. Any value not in these lis
 }
 ```
 
+- `layout` / `zoom` (top level): optional; they default to `RIGHT` and `1.0`.
 - `id`: optional. If it is missing, the script makes one from the parent's id and the node's position (for example `d1-1`).
 - `shape` / `color`: optional. A child without them takes its **parent's colour** and the `RECTANGLE` shape. The root defaults to `ELLIPSE` and `INDIGO`. When the root's children have no colour, the script gives each one a different colour automatically.
 - `collapsed`: optional bool.

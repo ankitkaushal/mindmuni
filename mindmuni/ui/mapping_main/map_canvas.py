@@ -135,6 +135,15 @@ class MapCanvas(tk.Canvas):
     def reset_zoom(self) -> None:
         self.set_zoom(1.0)
 
+    def restore_zoom(self, zoom: float) -> None:
+        """Sets the zoom without redrawing or scrolling, for a map about to be shown; the caller draws it next.
+
+        The zoom is clamped to MIN_ZOOM..MAX_ZOOM, and the zoom-changed handler runs.
+        """
+        self._zoom = min(max(zoom, MIN_ZOOM), MAX_ZOOM)
+        self._build_renderers()
+        self._on_zoom_changed()
+
     def set_zoom(self, zoom: float, anchor_x: float | None = None, anchor_y: float | None = None) -> None:
         """Zooms, keeping the map point under the window point (anchor_x, anchor_y) where it is.
 

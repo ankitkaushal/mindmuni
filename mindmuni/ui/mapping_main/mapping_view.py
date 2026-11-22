@@ -54,7 +54,7 @@ class MappingView(View):
         self._canvas.on_node_click(self._on_node_click)
         self._canvas.on_node_double_click(self._on_node_double_click)
         self._canvas.on_before_zoom(self.finish_editing)
-        self._canvas.on_zoom_changed(self._update_view_toolbar)
+        self._canvas.on_zoom_changed(self._on_zoom_changed)
         self._layout = TreeLayout(self._canvas.measure_node)
         self._title_editor = TitleEditor(
             self._canvas, on_commit=self._rename_node, on_editing_changed=lambda _editing: self._update_toolbar()
@@ -84,11 +84,12 @@ class MappingView(View):
         self.apply_theme(theme)
 
     def show_map(self, mind_map: MindMap) -> None:
-        """Shows the map with its root selected, centred on the root."""
+        """Shows the map at its saved zoom with its root selected, centred on the root."""
         self._title_editor.cancel()  # the node being edited belongs to the old map
         self._note_node_id = None  # and so does the note being edited
         self._mind_map = mind_map
         self._show_toolbars()
+        self._canvas.restore_zoom(mind_map.style.zoom)
         self._selection.select(mind_map.root.node_id)
         self._show_selected_note()
         self._redraw()
@@ -181,6 +182,12 @@ class MappingView(View):
     @property
     def zoom(self) -> float:
         return self._canvas.zoom
+
+    def _on_zoom_changed(self) -> None:
+        """Keeps the map's saved zoom in step with the canvas, however the zoom was changed."""
+        if self._mind_map is not None:
+            self._mind_map.style.zoom = self._canvas.zoom
+        self._update_view_toolbar()
 
     # --- dragging -----------------------------------------------------------
 
