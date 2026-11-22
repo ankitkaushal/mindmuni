@@ -29,6 +29,8 @@ class ShortcutMap:
     HEADING_1 = Shortcut(("<Control-Key-1>", "<Control-KP_1>"), "Ctrl+1")
     HEADING_2 = Shortcut(("<Control-Key-2>", "<Control-KP_2>"), "Ctrl+2")
     NORMAL_TEXT = Shortcut(("<Control-Key-0>", "<Control-KP_0>"), "Ctrl+0")
+    BOLD = Shortcut(("<Control-b>", "<Control-B>"), "Ctrl+B")
+    HIGHLIGHT = Shortcut(("<Control-h>", "<Control-H>"), "Ctrl+H")
 
     @staticmethod
     def bind_global(root: tk.Tk, shortcut: Shortcut, action: Callable[[], None]) -> None:

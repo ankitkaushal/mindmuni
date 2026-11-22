@@ -1,10 +1,20 @@
 import tkinter as tk
+from collections.abc import Iterator
+from enum import Enum
 
 from mindmuni.model.note_document import BlockType, NoteDocument, TextBlock, TextSpan
 from mindmuni.model.theme import Theme
 
-BOLD_TAG = "bold"
-HIGHLIGHT_TAG = "highlighted"
+
+class InlineFormat(Enum):
+    """Formatting that applies to characters rather than whole lines. Each value is its tk.Text tag."""
+
+    BOLD = "bold"
+    HIGHLIGHTED = "highlighted"
+
+
+BOLD_TAG = InlineFormat.BOLD.value
+HIGHLIGHT_TAG = InlineFormat.HIGHLIGHTED.value
 HEADING_TAGS = (BlockType.HEADING_1.value, BlockType.HEADING_2.value)  # a line without one is a paragraph
 
 
@@ -15,7 +25,8 @@ class RichTextAdapter:
     mark: a heading's newline carries "HEADING_1" or "HEADING_2", a paragraph's carries neither. The rest of
     the line carries the same tag only so it is drawn in the heading font; normalize_blocks() puts it back
     after edits, because Tk gives typed characters only the tags shared by the characters on both sides.
-    Bold and highlighted characters carry "bold" and "highlighted".
+    Bold and highlighted characters carry "bold" and "highlighted". Newlines never carry them, so typing at
+    the end of a bold line is plain, as it is at the end of any bold run.
 
     Keeping the type on the newline means typing never changes a line's type, an empty line can be a
     heading, and joining two lines (BackSpace at the start of a line) keeps the lower line's type.
@@ -79,11 +90,52 @@ class RichTextAdapter:
                 text.tag_add(block_type.value, start, end)
 
     def normalize_blocks(self) -> None:
-        """Re-tags every line's characters with the block type on its newline. Run after edits."""
+        """Re-tags every line's characters with the block type on its newline, and takes bold and highlight off
+        the newlines (Enter inside a bold run gives the new one bold). Run after edits."""
         for line in range(1, self.line_count() + 1):
             self.set_block_type(line, line, self.block_type_at(f"{line}.0"))
+            for inline_format in InlineFormat:
+                self._text.tag_remove(inline_format.value, f"{line}.end")
+
+    def has_format(self, inline_format: InlineFormat, start: str, end: str) -> bool:
+        """True if every character from start to end (newlines aside) has the format. False for a range with
+        no such characters."""
+        segments = list(self._line_segments(start, end))
+        return bool(segments) and all(self._is_covered(inline_format.value, *segment) for segment in segments)
+
+    def toggle_format(self, inline_format: InlineFormat, start: str, end: str) -> None:
+        """Removes the format from start..end if all of it has it, otherwise adds it to all of it."""
+        tag = inline_format.value
+        remove = self.has_format(inline_format, start, end)
+        for segment_start, segment_end in self._line_segments(start, end):
+            if remove:
+                self._text.tag_remove(tag, segment_start, segment_end)
+            else:
+                self._text.tag_add(tag, segment_start, segment_end)
 
     # --- internals ----------------------------------------------------------
+
+    def _line_segments(self, start: str, end: str) -> Iterator[tuple[str, str]]:
+        """The non-empty parts of start..end on each line, without the newlines."""
+        text = self._text
+        first_line, last_line = (int(text.index(index).split(".")[0]) for index in (start, end))
+        for line in range(first_line, last_line + 1):
+            segment_start = start if line == first_line else f"{line}.0"
+            segment_end = end if line == last_line else f"{line}.end"
+            if text.compare(segment_end, ">", f"{line}.end"):
+                segment_end = f"{line}.end"
+            if text.compare(segment_start, "<", segment_end):
+                yield text.index(segment_start), text.index(segment_end)
+
+    def _is_covered(self, tag: str, start: str, end: str) -> bool:
+        """True if every character from start to end has the tag."""
+        text = self._text
+        index = start
+        while text.compare(index, "<", end):
+            if tag not in text.tag_names(index):
+                return False
+            index = text.tag_prevrange(tag, f"{index}+1c")[1]  # the end of the run holding `index`
+        return True
 
     def _dump_line(self, line: int) -> TextBlock:
         text = self._text

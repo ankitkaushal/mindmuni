@@ -82,7 +82,7 @@ MindMuni/
     │   └── text_editor/            # Node text component
     │       ├── __init__.py
     │       ├── text_editor_view.py # TextEditorView (toolbar + tk.Text + scrollbar)
-    │       ├── formatting_toolbar.py # FormattingToolbar (H1, H2, Normal)
+    │       ├── formatting_toolbar.py # FormattingToolbar (H1, H2, Normal | Bold, Highlight)
     │       └── rich_text_adapter.py # NoteDocument <-> tk.Text tags
     │
     └── utils/                      # Small helpers with no domain knowledge

@@ -19,10 +19,12 @@ caller (preview script, later the app)
 TextEditorView ─────────────── owns ───────────────┐
    │  ▲                                             │
    │  │ on_block_type(t)        show_block_type(t)  │
+   │  │ on_inline_format(f)     show_inline_formats │
    │  └──────────── FormattingToolbar ◄─────────────┤
    │                                                │
    │  load · dump · set_block_type                  │
    │  block_type_at · normalize_blocks              │
+   │  has_format · toggle_format                    │
    ▼                                                ▼
 RichTextAdapter ──── reads/writes text + tags ──► tk.Text (+ ttk.Scrollbar)
                                                    tags: bold, highlighted,
@@ -73,6 +75,14 @@ Every piece of formatting is a Tk text tag.
 | `TextSpan.bold` | Tag `"bold"` on its characters |
 | `TextSpan.highlighted` | Tag `"highlighted"` on its characters |
 
+The inline tags' names are the values of `InlineFormat` (`BOLD`, `HIGHLIGHTED`),
+an enum in `rich_text_adapter.py` that the view and toolbar use to name a
+format. Newlines never carry inline tags: `toggle_format()` skips them and
+`normalize_blocks()` strips them (`Enter` inside a bold run would otherwise
+give the new newline bold). Without this, typing at the end of a fully bold line
+would stay bold, because both neighbours, the last character and the newline,
+would be bold.
+
 ### Block type lives on the newline
 Like Word's paragraph mark, the newline character carries the line's type.
 This choice gives the editing behaviour for free:
@@ -95,6 +105,17 @@ Tags are created in the order `bold`, `highlighted`, `HEADING_2`,
 font wins over `bold` (bold inside a heading looks like the rest of it but is
 still kept). `sel` is raised to the top so selections stay visible over
 highlighted text.
+
+### has_format() and toggle_format()
+Both work on a range split into one segment per line, newlines left out
+(`_line_segments()`).
+- `has_format(f, start, end)` is true when every segment is fully covered by
+  the tag. `_is_covered()` jumps from run to run of the tag with
+  `tag_prevrange(tag, index+1c)` instead of checking each character. A range with
+  no characters, such as a selection of only an empty line, is false.
+- `toggle_format(f, start, end)` removes the tag from every segment if
+  `has_format()` is true, otherwise adds it to every segment. So a partly bold
+  selection becomes all bold first, as in most editors.
 
 ### load()
 1. Delete everything and strip heading tags from the surviving final newline.
@@ -122,7 +143,8 @@ heading without the heading font. The view fixes this after every change:
 
 ```
 edit ──► <<Modified>> ──► _on_modified()
-                            ├─ adapter.normalize_blocks()   # re-tag each line from its newline
+                            ├─ adapter.normalize_blocks()   # re-tag each line from its newline,
+                            │                               # strip inline tags from newlines
                             └─ text.edit_modified(False)    # re-arm the event
 ```
 
@@ -138,6 +160,7 @@ the clear itself triggers.
 | `<Return>`, `<KP_Enter>` | `_on_return` | At the end of a heading (no selection), insert `\n` and make the new line a paragraph; returns `"break"`. Otherwise falls through to Tk's default |
 | `<KeyRelease>`, `<ButtonRelease-1>` | `_update_toolbar` | Tk has no "cursor moved" event, so the toolbar is refreshed after keys and clicks |
 | `Ctrl+1` / `Ctrl+2` / `Ctrl+0` | `set_block_type(...)` | Bound locally on the text widget via `ShortcutMap.bind_local`, using `ShortcutMap.HEADING_1`, `HEADING_2`, `NORMAL_TEXT` |
+| `Ctrl+B` / `Ctrl+H` | `toggle_format(...)` | `ShortcutMap.BOLD`, `HIGHLIGHT`. The handler returns `"break"`, so `tk.Text`'s own class bindings (cursor left, BackSpace) don't run |
 
 ### Which lines a command applies to
 `_selected_lines()` returns the cursor's line, or the first and last line the
@@ -145,21 +168,30 @@ selection touches. A selection ending at column 0 of a later line leaves that
 line out, which matches what the user sees as selected.
 
 `_update_toolbar()` collects the block types of those lines and highlights the
-button only when they're all the same; mixed selections highlight nothing.
+button only when they're all the same; mixed selections highlight nothing. It
+also tells the toolbar which inline formats the whole selection has
+(`has_format()` on `sel.first`..`sel.last`), and enables Bold and Highlight only
+when there is a selection. `toggle_format()` in the view does nothing without a
+selection.
 
 ---
 
 ## 5. The toolbar (`FormattingToolbar`)
 
-A plain `tk.Frame` with **H1**, **H2** and **Normal**, made with the shared
+A plain `tk.Frame` with **H1**, **H2** and **Normal**, a one-pixel separator,
+then **Bold** and **Highlight**, all made with the shared
 `create_toolbar_button()` / `style_toolbar_button()` from
 `mindmuni/ui/core/toolbar_button.py` (the same helpers as the map toolbars).
 
 It's deliberately passive:
-- **Out:** a click calls the `on_block_type(block_type)` callback given at
-  construction (the view passes `set_block_type`).
-- **In:** `show_block_type(block_type | None)` sets which button is drawn with
-  `highlight_background`.
+- **Out:** a click calls the `on_block_type(block_type)` or
+  `on_inline_format(inline_format)` callback given at construction (the view
+  passes `set_block_type` and `toggle_format`).
+- **In:** `show_block_type(block_type | None)` and
+  `show_inline_formats(active, enabled)` set which buttons are drawn with
+  `highlight_background`, and whether Bold and Highlight are enabled.
+
+The buttons are laid out with `pack(side="left")` inside the bar.
 
 It has no reference to the text widget, so it could be reused or replaced
 without touching the editing logic. After a click the view puts focus back on
@@ -188,7 +220,7 @@ the text so typing continues.
 |------|--------------|
 | Text area | `canvas_background`, `foreground` (text and cursor), `selection_outline` (selection), `connector_line` (inactive selection), font `family` / `base_size` |
 | Tags (adapter) | `bold` → base size bold; `highlighted` → `highlight_background`; `HEADING_1` / `HEADING_2` → `heading_1_size` / `heading_2_size` bold |
-| Toolbar | `menu_background`, toolbar button styling, `highlight_background` for the current type |
+| Toolbar | `menu_background`, toolbar button styling (`connector_line` for disabled text), `highlight_background` for the current type and active formats, `connector_line` for the separator |
 | Border | `connector_line` |
 
 ---
@@ -196,8 +228,8 @@ the text so typing continues.
 ## 8. Undo
 
 Undo/redo is `tk.Text`'s own (`undo=True`). It records insertions and
-deletions but not tag changes, so block-type changes made with the toolbar or
-shortcuts aren't undoable. `load()` calls `edit_reset()` so one note's history
+deletions but not tag changes, so block-type and bold/highlight changes made
+with the toolbar or shortcuts aren't undoable. `load()` calls `edit_reset()` so one note's history
 can't be undone into another.
 
 ---
@@ -213,7 +245,8 @@ Planned work and where it fits:
 
 | Feature | Where |
 |---------|-------|
-| Bold / Highlight buttons and `Ctrl+B` / `Ctrl+H` | New buttons and a toggle callback in `FormattingToolbar`; a tag add/remove over the selection in `RichTextAdapter`; shortcuts in `ShortcutMap` bound in `_bind_keys()` |
+| `Ctrl+B` / `Ctrl+H` with no selection (format the next typed text) | A pending-format set in the view, applied to inserted text in `_on_modified()` and cleared when the cursor moves |
 | Back button | Toolbar callback that asks the navigator to return to the map |
 | App wiring | Register `TextEditorView` instead of the placeholder; in `on_show(context)` call `show_note()` with the node's note, and in `on_hide()` write `note()` back to the node |
+| New inline formats | Add to `InlineFormat` and `TextSpan`, configure the tag in `apply_theme()`, read it in `_dump_line()` / write it in `load()`, add to `INLINE_BUTTONS` |
 | New block types | Add to `BlockType`, add the tag to `HEADING_TAGS` (or a renamed equivalent) with its font, add a toolbar button |
