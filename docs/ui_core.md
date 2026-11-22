@@ -24,7 +24,7 @@ sudo apt install python3-tk      # Ubuntu/Debian only; Windows/macOS python.org 
 | File | Contains |
 |------|----------|
 | `main.py` | `main()` creates `MindMuniApp` and calls `run()`. Nothing else. |
-| `mindmuni/app.py` | `MindMuniApp`, the **composition root**. It is the only place that creates concrete objects and connects them. It builds the core services and the UI, registers views, subscribes to events, binds global shortcuts and shows the first view. It also holds the File-menu handlers and the open map with its file path. Open loads the chosen `.mson` file through `MapRepository` and shows it in the `MappingView`. Save writes to that path, or acts like Save As when there is none. Save As asks for a path (suggesting the current file's name, or the map's title) and makes it the map's path from then on. Both first call `MappingView.finish_editing()` so a title being typed is saved too. Read and write errors are shown with `Dialogs.show_error()`. New is still a placeholder. |
+| `mindmuni/app.py` | `MindMuniApp`, the **composition root**. It is the only place that creates concrete objects and connects them. It builds the core services and the UI, registers views, subscribes to events, binds global shortcuts and shows the first view. It also holds the File-menu handlers and the open map with its file path. Open loads the chosen `.mson` file through `MapRepository` and shows it in the `MappingView`. Save writes to that path, or acts like Save As when there is none. Save As asks for a path (suggesting the current file's name, or the map's title) and makes it the map's path from then on. Both first call `MappingView.finish_editing()` so a title being typed is saved too. Read and write errors are shown with `Dialogs.show_error()`. New shows a fresh map, titled "Untitled map", with only a "Central idea" root opened for typing; it has no file until it is saved. |
 
 ### `mindmuni/ui/core/`: Tkinter widgets
 
@@ -123,7 +123,6 @@ navigator.back() / Esc               → previous view restored with its origina
 
 | Item | Current behaviour | Replaced by |
 |------|-------------------|-------------|
-| New | Only resets the window title and view; the open map stays on screen | Creating an empty map |
 | Unsaved changes | Not tracked: no `*` in the title, no prompt before Open | A dirty flag plus `Dialogs.confirm_discard_changes()` |
 | Theme → Custom… | Reports the chosen file only | `ThemeRepository.load_custom()` |
 | Quit | Closes without asking about unsaved changes | A dirty check plus `Dialogs.confirm_discard_changes()` |
