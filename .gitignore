@@ -8,3 +8,6 @@ __pycache__/
 .idea/modules.xml
 .idea/*.iml
 .mcp.json
+
+# Local notes and plans
+notes/
