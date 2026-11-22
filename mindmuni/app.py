@@ -101,7 +101,7 @@ class MindMuniApp:
 
     def _start(self) -> None:
         self._theme_manager.apply(self._theme_manager.current_theme.name)
-        self._window.set_document_title(UNTITLED_MAP_TITLE)
+        self._update_window_title()
         self._navigator.reset_to(MAP_VIEW_ID)
 
     # --- event handlers -----------------------------------------------------
@@ -139,7 +139,14 @@ class MindMuniApp:
         self._mind_map, self._map_path = mind_map, path
         self._navigator.reset_to(MAP_VIEW_ID)
         self._mapping_view.show_map(mind_map)
-        self._window.set_document_title(mind_map.title)
+        self._update_window_title()
+
+    def _update_window_title(self) -> None:
+        """The map's file name, "Untitled map" if it has no file yet, or just the app name if no map is open."""
+        if self._mind_map is None:
+            self._window.clear_document_title()
+        else:
+            self._window.set_document_title(self._map_path.stem if self._map_path else UNTITLED_MAP_TITLE)
 
     def _save_map(self) -> None:
         """Saves to the map's file, or asks for one (like Save As) if it has none yet."""
@@ -166,6 +173,7 @@ class MindMuniApp:
             self._dialogs.show_error("Save map", f"Could not save {path.name}:\n{error}")
             return
         self._map_path = path
+        self._update_window_title()
         self._window.status_bar.show_message(f"Saved {path.name}")
 
     def _load_custom_theme(self) -> None:

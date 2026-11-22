@@ -25,6 +25,10 @@ class MainWindow:
         dirty_marker = "*" if has_unsaved_changes else ""
         self.root.title(f"{dirty_marker}{document_title} — {APP_NAME}")
 
+    def clear_document_title(self) -> None:
+        """Shows only the app name, for when no document is open."""
+        self.root.title(APP_NAME)
+
     def on_close_requested(self, handler: Callable[[], None]) -> None:
         self.root.protocol("WM_DELETE_WINDOW", handler)
 
