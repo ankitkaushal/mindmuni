@@ -1,0 +1,2760 @@
+[
+  {
+    "format_version": 1,
+    "map_id": "cissp-domains",
+    "title": "CISSP Domains",
+    "created_at": "2026-11-22T19:38:39",
+    "updated_at": "2026-11-22T19:46:07",
+    "root": {
+      "node_id": "root",
+      "title": "CISSP\n8 Domains",
+      "children": [
+        {
+          "node_id": "d1",
+          "title": "1. Security &\nRisk Management",
+          "children": [
+            {
+              "node_id": "d1-cia",
+              "title": "CIA triad &\nsecurity concepts",
+              "children": []
+            },
+            {
+              "node_id": "d1-gov",
+              "title": "Governance &\npolicies",
+              "children": []
+            },
+            {
+              "node_id": "d1-risk",
+              "title": "Risk management",
+              "children": []
+            },
+            {
+              "node_id": "d1-legal",
+              "title": "Legal, regulatory\n& ethics",
+              "children": []
+            },
+            {
+              "node_id": "d1-bcp",
+              "title": "Business continuity",
+              "children": []
+            },
+            {
+              "node_id": "d1-people",
+              "title": "Personnel &\nsupply chain",
+              "children": []
+            }
+          ]
+        },
+        {
+          "node_id": "d2",
+          "title": "2. Asset Security",
+          "children": [
+            {
+              "node_id": "d2-class",
+              "title": "Classification &\nlabeling",
+              "children": []
+            },
+            {
+              "node_id": "d2-roles",
+              "title": "Data roles",
+              "children": []
+            },
+            {
+              "node_id": "d2-life",
+              "title": "Data lifecycle\n& retention",
+              "children": []
+            },
+            {
+              "node_id": "d2-states",
+              "title": "Data states &\nprotection",
+              "children": []
+            },
+            {
+              "node_id": "d2-dest",
+              "title": "Data remanence\n& destruction",
+              "children": []
+            }
+          ]
+        },
+        {
+          "node_id": "d3",
+          "title": "3. Security Architecture\n& Engineering",
+          "children": [
+            {
+              "node_id": "d3-models",
+              "title": "Security models",
+              "children": []
+            },
+            {
+              "node_id": "d3-eval",
+              "title": "Evaluation &\ncertification",
+              "children": []
+            },
+            {
+              "node_id": "d3-arch",
+              "title": "Architecture\nvulnerabilities",
+              "children": []
+            },
+            {
+              "node_id": "d3-crypto",
+              "title": "Cryptography",
+              "children": []
+            },
+            {
+              "node_id": "d3-phys",
+              "title": "Site & physical\nsecurity",
+              "children": []
+            }
+          ]
+        },
+        {
+          "node_id": "d4",
+          "title": "4. Communication &\nNetwork Security",
+          "children": [
+            {
+              "node_id": "d4-osi",
+              "title": "OSI & TCP/IP\nmodels",
+              "children": []
+            },
+            {
+              "node_id": "d4-proto",
+              "title": "Secure protocols",
+              "children": []
+            },
+            {
+              "node_id": "d4-comp",
+              "title": "Network components",
+              "children": []
+            },
+            {
+              "node_id": "d4-design",
+              "title": "Secure network\ndesign",
+              "children": []
+            },
+            {
+              "node_id": "d4-wire",
+              "title": "Wireless &\nremote access",
+              "children": []
+            }
+          ]
+        },
+        {
+          "node_id": "d5",
+          "title": "5. Identity & Access\nManagement (IAM)",
+          "children": [
+            {
+              "node_id": "d5-authn",
+              "title": "Authentication",
+              "children": []
+            },
+            {
+              "node_id": "d5-models",
+              "title": "Access control\nmodels",
+              "children": []
+            },
+            {
+              "node_id": "d5-fed",
+              "title": "Federation & SSO",
+              "children": []
+            },
+            {
+              "node_id": "d5-life",
+              "title": "Identity lifecycle",
+              "children": []
+            },
+            {
+              "node_id": "d5-attacks",
+              "title": "Access control\nattacks",
+              "children": []
+            }
+          ]
+        },
+        {
+          "node_id": "d6",
+          "title": "6. Security Assessment\n& Testing",
+          "children": [
+            {
+              "node_id": "d6-strat",
+              "title": "Assessment &\naudit strategy",
+              "children": []
+            },
+            {
+              "node_id": "d6-vuln",
+              "title": "Vulnerability\nassessment",
+              "children": []
+            },
+            {
+              "node_id": "d6-pentest",
+              "title": "Penetration\ntesting",
+              "children": []
+            },
+            {
+              "node_id": "d6-code",
+              "title": "Software testing",
+              "children": []
+            },
+            {
+              "node_id": "d6-data",
+              "title": "Security process\ndata & reporting",
+              "children": []
+            }
+          ]
+        },
+        {
+          "node_id": "d7",
+          "title": "7. Security\nOperations",
+          "children": [
+            {
+              "node_id": "d7-inv",
+              "title": "Investigations &\nforensics",
+              "children": []
+            },
+            {
+              "node_id": "d7-mon",
+              "title": "Logging &\nmonitoring",
+              "children": []
+            },
+            {
+              "node_id": "d7-ir",
+              "title": "Incident\nmanagement",
+              "children": []
+            },
+            {
+              "node_id": "d7-ops",
+              "title": "Operations\nconcepts",
+              "children": []
+            },
+            {
+              "node_id": "d7-dr",
+              "title": "Recovery &\nDR",
+              "children": []
+            }
+          ]
+        },
+        {
+          "node_id": "d8",
+          "title": "8. Software Development\nSecurity",
+          "children": [
+            {
+              "node_id": "d8-sdlc",
+              "title": "Secure SDLC &\nmethodologies",
+              "children": []
+            },
+            {
+              "node_id": "d8-code",
+              "title": "Secure coding",
+              "children": []
+            },
+            {
+              "node_id": "d8-env",
+              "title": "Development\nenvironment",
+              "children": []
+            },
+            {
+              "node_id": "d8-acq",
+              "title": "Acquired software\nrisk",
+              "children": []
+            },
+            {
+              "node_id": "d8-db",
+              "title": "Databases &\nAI/ML",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "map": {
+      "layout": "BALANCED",
+      "zoom": 0.401877572016461
+    },
+    "nodes": {
+      "root": {
+        "shape": "ELLIPSE",
+        "color": "INDIGO",
+        "position": {
+          "x": 548.7,
+          "y": 608.0
+        },
+        "collapsed": false
+      },
+      "d1": {
+        "shape": "HEXAGON",
+        "color": "RED",
+        "position": {
+          "x": 773.5250000000001,
+          "y": 168.0
+        },
+        "collapsed": false
+      },
+      "d1-cia": {
+        "shape": "RECTANGLE",
+        "color": "RED",
+        "position": {
+          "x": 1017.3,
+          "y": 23.0
+        },
+        "collapsed": false
+      },
+      "d1-gov": {
+        "shape": "RECTANGLE",
+        "color": "RED",
+        "position": {
+          "x": 1017.3,
+          "y": 85.0
+        },
+        "collapsed": false
+      },
+      "d1-risk": {
+        "shape": "RECTANGLE",
+        "color": "RED",
+        "position": {
+          "x": 1017.3,
+          "y": 142.0
+        },
+        "collapsed": false
+      },
+      "d1-legal": {
+        "shape": "RECTANGLE",
+        "color": "RED",
+        "position": {
+          "x": 1017.3,
+          "y": 199.0
+        },
+        "collapsed": false
+      },
+      "d1-bcp": {
+        "shape": "RECTANGLE",
+        "color": "RED",
+        "position": {
+          "x": 1017.3,
+          "y": 256.0
+        },
+        "collapsed": false
+      },
+      "d1-people": {
+        "shape": "RECTANGLE",
+        "color": "RED",
+        "position": {
+          "x": 1017.3,
+          "y": 313.0
+        },
+        "collapsed": false
+      },
+      "d2": {
+        "shape": "HEXAGON",
+        "color": "ORANGE",
+        "position": {
+          "x": 773.5250000000001,
+          "y": 494.0
+        },
+        "collapsed": false
+      },
+      "d2-class": {
+        "shape": "RECTANGLE",
+        "color": "ORANGE",
+        "position": {
+          "x": 1017.3,
+          "y": 375.0
+        },
+        "collapsed": false
+      },
+      "d2-roles": {
+        "shape": "RECTANGLE",
+        "color": "ORANGE",
+        "position": {
+          "x": 1017.3,
+          "y": 432.0
+        },
+        "collapsed": false
+      },
+      "d2-life": {
+        "shape": "RECTANGLE",
+        "color": "ORANGE",
+        "position": {
+          "x": 1017.3,
+          "y": 489.0
+        },
+        "collapsed": false
+      },
+      "d2-states": {
+        "shape": "RECTANGLE",
+        "color": "ORANGE",
+        "position": {
+          "x": 1017.3,
+          "y": 551.0
+        },
+        "collapsed": false
+      },
+      "d2-dest": {
+        "shape": "RECTANGLE",
+        "color": "ORANGE",
+        "position": {
+          "x": 1017.3,
+          "y": 613.0
+        },
+        "collapsed": false
+      },
+      "d3": {
+        "shape": "HEXAGON",
+        "color": "AMBER",
+        "position": {
+          "x": 773.5250000000001,
+          "y": 789.0
+        },
+        "collapsed": false
+      },
+      "d3-models": {
+        "shape": "RECTANGLE",
+        "color": "AMBER",
+        "position": {
+          "x": 1017.3,
+          "y": 670.0
+        },
+        "collapsed": false
+      },
+      "d3-eval": {
+        "shape": "RECTANGLE",
+        "color": "AMBER",
+        "position": {
+          "x": 1017.3,
+          "y": 727.0
+        },
+        "collapsed": false
+      },
+      "d3-arch": {
+        "shape": "RECTANGLE",
+        "color": "AMBER",
+        "position": {
+          "x": 1017.3,
+          "y": 789.0
+        },
+        "collapsed": false
+      },
+      "d3-crypto": {
+        "shape": "RECTANGLE",
+        "color": "AMBER",
+        "position": {
+          "x": 1017.3,
+          "y": 846.0
+        },
+        "collapsed": false
+      },
+      "d3-phys": {
+        "shape": "RECTANGLE",
+        "color": "AMBER",
+        "position": {
+          "x": 1017.3,
+          "y": 903.0
+        },
+        "collapsed": false
+      },
+      "d4": {
+        "shape": "HEXAGON",
+        "color": "GREEN",
+        "position": {
+          "x": 773.5250000000001,
+          "y": 1079.0
+        },
+        "collapsed": false
+      },
+      "d4-osi": {
+        "shape": "RECTANGLE",
+        "color": "GREEN",
+        "position": {
+          "x": 1017.3,
+          "y": 965.0
+        },
+        "collapsed": false
+      },
+      "d4-proto": {
+        "shape": "RECTANGLE",
+        "color": "GREEN",
+        "position": {
+          "x": 1017.3,
+          "y": 1022.0
+        },
+        "collapsed": false
+      },
+      "d4-comp": {
+        "shape": "RECTANGLE",
+        "color": "GREEN",
+        "position": {
+          "x": 1017.3,
+          "y": 1074.0
+        },
+        "collapsed": false
+      },
+      "d4-design": {
+        "shape": "RECTANGLE",
+        "color": "GREEN",
+        "position": {
+          "x": 1017.3,
+          "y": 1131.0
+        },
+        "collapsed": false
+      },
+      "d4-wire": {
+        "shape": "RECTANGLE",
+        "color": "GREEN",
+        "position": {
+          "x": 1017.3,
+          "y": 1193.0
+        },
+        "collapsed": false
+      },
+      "d5": {
+        "shape": "HEXAGON",
+        "color": "TEAL",
+        "position": {
+          "x": 315.82500000000005,
+          "y": 153.0
+        },
+        "collapsed": false
+      },
+      "d5-authn": {
+        "shape": "RECTANGLE",
+        "color": "TEAL",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 39.0
+        },
+        "collapsed": false
+      },
+      "d5-models": {
+        "shape": "RECTANGLE",
+        "color": "TEAL",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 96.0
+        },
+        "collapsed": false
+      },
+      "d5-fed": {
+        "shape": "RECTANGLE",
+        "color": "TEAL",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 153.0
+        },
+        "collapsed": false
+      },
+      "d5-life": {
+        "shape": "RECTANGLE",
+        "color": "TEAL",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 205.0
+        },
+        "collapsed": false
+      },
+      "d5-attacks": {
+        "shape": "RECTANGLE",
+        "color": "TEAL",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 262.0
+        },
+        "collapsed": false
+      },
+      "d6": {
+        "shape": "HEXAGON",
+        "color": "CYAN",
+        "position": {
+          "x": 315.82500000000005,
+          "y": 443.0
+        },
+        "collapsed": false
+      },
+      "d6-strat": {
+        "shape": "RECTANGLE",
+        "color": "CYAN",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 324.0
+        },
+        "collapsed": false
+      },
+      "d6-vuln": {
+        "shape": "RECTANGLE",
+        "color": "CYAN",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 386.0
+        },
+        "collapsed": false
+      },
+      "d6-pentest": {
+        "shape": "RECTANGLE",
+        "color": "CYAN",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 448.0
+        },
+        "collapsed": false
+      },
+      "d6-code": {
+        "shape": "RECTANGLE",
+        "color": "CYAN",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 505.0
+        },
+        "collapsed": false
+      },
+      "d6-data": {
+        "shape": "RECTANGLE",
+        "color": "CYAN",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 562.0
+        },
+        "collapsed": false
+      },
+      "d7": {
+        "shape": "HEXAGON",
+        "color": "BLUE",
+        "position": {
+          "x": 315.82500000000005,
+          "y": 748.0
+        },
+        "collapsed": false
+      },
+      "d7-inv": {
+        "shape": "RECTANGLE",
+        "color": "BLUE",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 624.0
+        },
+        "collapsed": false
+      },
+      "d7-mon": {
+        "shape": "RECTANGLE",
+        "color": "BLUE",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 686.0
+        },
+        "collapsed": false
+      },
+      "d7-ir": {
+        "shape": "RECTANGLE",
+        "color": "BLUE",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 748.0
+        },
+        "collapsed": false
+      },
+      "d7-ops": {
+        "shape": "RECTANGLE",
+        "color": "BLUE",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 810.0
+        },
+        "collapsed": false
+      },
+      "d7-dr": {
+        "shape": "RECTANGLE",
+        "color": "BLUE",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 872.0
+        },
+        "collapsed": false
+      },
+      "d8": {
+        "shape": "HEXAGON",
+        "color": "PURPLE",
+        "position": {
+          "x": 315.82500000000005,
+          "y": 1053.0
+        },
+        "collapsed": false
+      },
+      "d8-sdlc": {
+        "shape": "RECTANGLE",
+        "color": "PURPLE",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 934.0
+        },
+        "collapsed": false
+      },
+      "d8-code": {
+        "shape": "RECTANGLE",
+        "color": "PURPLE",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 991.0
+        },
+        "collapsed": false
+      },
+      "d8-env": {
+        "shape": "RECTANGLE",
+        "color": "PURPLE",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 1048.0
+        },
+        "collapsed": false
+      },
+      "d8-acq": {
+        "shape": "RECTANGLE",
+        "color": "PURPLE",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 1110.0
+        },
+        "collapsed": false
+      },
+      "d8-db": {
+        "shape": "RECTANGLE",
+        "color": "PURPLE",
+        "position": {
+          "x": 73.00000000000006,
+          "y": 1172.0
+        },
+        "collapsed": false
+      }
+    }
+  },
+  {
+    "notes": {
+      "root": {
+        "blocks": [
+          {
+            "block_type": "HEADING_1",
+            "spans": [
+              {
+                "text": "CISSP Common Body of Knowledge",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "The ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "Certified Information Systems Security Professional",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " exam, run by ISC2, covers eight domains.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "The 8 domains",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "1. Security and Risk Management (16%)",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "2. Asset Security (10%)",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "3. Security Architecture and Engineering (13%)",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "4. Communication and Network Security (13%)",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "5. Identity and Access Management (13%)",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "6. Security Assessment and Testing (12%)",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "7. Security Operations (13%)",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "8. Software Development Security (10%)",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Exam mindset",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Think like a manager and risk adviser, not a technician.",
+                "bold": false,
+                "highlighted": true
+              },
+              {
+                "text": " Choose the answer that protects people first, then supports the business and follows policy.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d1": {
+        "blocks": [
+          {
+            "block_type": "HEADING_1",
+            "spans": [
+              {
+                "text": "Domain 1: Security and Risk Management",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Exam weight: about 16%",
+                "bold": false,
+                "highlighted": true
+              },
+              {
+                "text": " (the largest domain)",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Summary",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "The foundation of the CISSP. It covers how security supports the business: governance, the ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "CIA triad",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", risk management, legal and regulatory compliance, professional ethics, policies, business continuity, personnel security and supply chain risk.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Key ideas",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Think like a manager:",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " security exists to enable business objectives, and senior management owns the risk.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Due care",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " is doing the right thing; ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "due diligence",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " is verifying it keeps being done.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Policies (mandatory, high level) are supported by standards, baselines, guidelines (optional) and procedures (step by step).",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d1-cia": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Confidentiality, Integrity, Availability",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", extended by authenticity and non-repudiation (the 5 pillars).",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Opposites (DAD): Disclosure, Alteration, Destruction.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d1-gov": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Security governance aligns security with business strategy, goals, mission and objectives.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Frameworks: ISO 27001/27002, NIST CSF, COBIT. Roles: senior management (accountable), data owner, custodian, user.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d1-risk": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Risk = threat × vulnerability (× impact). ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "ALE = SLE × ARO",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", where SLE = asset value × exposure factor.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Responses: ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "mitigate, transfer, avoid, accept",
+                "bold": false,
+                "highlighted": true
+              },
+              {
+                "text": " (never ignore). Frameworks: NIST RMF (SP 800-37), ISO 31000.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d1-legal": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Laws and regulations: GDPR, HIPAA, SOX, PCI DSS (contractual), intellectual property, transborder data flow.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "(ISC)² Code of Ethics canons:",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " protect society; act honorably; provide diligent service to principals; advance the profession.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d1-bcp": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "BIA",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " identifies critical functions and sets ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "MTD",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "RTO",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " and ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "RPO",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ".",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "BCP keeps the business running; DRP (Domain 7) restores IT. ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "Human safety always comes first.",
+                "bold": false,
+                "highlighted": true
+              }
+            ]
+          }
+        ]
+      },
+      "d1-people": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Background checks, NDAs, job rotation, mandatory vacation, separation of duties, secure termination.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Third-party and supply chain risk: SLAs, assessments, minimum security requirements. Security awareness training.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d2": {
+        "blocks": [
+          {
+            "block_type": "HEADING_1",
+            "spans": [
+              {
+                "text": "Domain 2: Asset Security",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Exam weight: about 10%",
+                "bold": false,
+                "highlighted": true
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Summary",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Protecting information and the assets that hold it throughout their lifecycle: identifying and ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "classifying",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " data, establishing ownership, handling and retention requirements, privacy, and secure destruction.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Key ideas",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Classification drives the protection level: protect data according to its value and sensitivity.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Data exists in three states: ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "at rest, in transit, in use",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", and each needs its own controls.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d2-class": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Government: Top Secret, Secret, Confidential, Unclassified. Commercial: Confidential, Private, Sensitive, Public.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Classify, then label/mark, then handle according to the label.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d2-roles": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Owner",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " (sets classification, accountable), ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "custodian",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " (implements controls day to day), ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "steward",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "processor",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "controller",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "subject",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", user.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d2-life": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Create, store, use, share, archive, destroy. Keep data only as long as legally or business required.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Data minimization reduces exposure.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d2-states": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "At rest: encryption, access control. In transit: TLS, VPN. In use: memory protection, confidential computing.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "DLP, DRM, CASB, tokenization, pseudonymization and anonymization.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d2-dest": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Clearing, purging, destruction. Methods: overwriting, degaussing (magnetic only), crypto-shredding, physical shredding/incineration.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "SSDs: degaussing does not work; prefer crypto-erase or physical destruction.",
+                "bold": false,
+                "highlighted": true
+              }
+            ]
+          }
+        ]
+      },
+      "d3": {
+        "blocks": [
+          {
+            "block_type": "HEADING_1",
+            "spans": [
+              {
+                "text": "Domain 3: Security Architecture and Engineering",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Exam weight: about 13%",
+                "bold": false,
+                "highlighted": true
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Summary",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Designing and building secure systems: secure design principles, security models, evaluation criteria, vulnerabilities of architectures (cloud, IoT, ICS, embedded), ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "cryptography",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", and physical/site security.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Key ideas",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Secure design principles: ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "least privilege, defense in depth, secure defaults, fail securely, separation of duties, keep it simple, zero trust, privacy by design, shared responsibility",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ".",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d3-models": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Bell-LaPadula",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " (confidentiality: no read up, no write down). ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "Biba",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " (integrity: no read down, no write up).",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Clark-Wilson (well-formed transactions), Brewer-Nash (Chinese Wall), Graham-Denning, Harrison-Ruzzo-Ullman.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d3-eval": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Common Criteria",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " (ISO 15408): Protection Profiles, Security Targets, EAL1–EAL7.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Certification (technical evaluation) versus accreditation (management's formal acceptance of risk).",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d3-arch": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "TCB, reference monitor, security kernel. Cloud (IaaS/PaaS/SaaS), virtualization, containers, serverless, IoT, ICS/SCADA, embedded systems.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Attacks: side channel, TOCTOU, covert channels, emanations.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d3-crypto": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Symmetric (AES) is fast; asymmetric (RSA, ECC) handles key exchange and signatures. Hashing (SHA-2/3) for integrity.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Digital signature",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " = hash encrypted with the sender's private key. PKI, certificates, CAs, key management lifecycle.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Quantum-safe (post-quantum) algorithms are increasingly in scope.",
+                "bold": false,
+                "highlighted": true
+              }
+            ]
+          }
+        ]
+      },
+      "d3-phys": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "CPTED, layered perimeters, mantraps, fire suppression (classes A, B, C, D, K), HVAC, power (UPS, generators).",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Wiring closets, data centers, media storage. Life safety first.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d4": {
+        "blocks": [
+          {
+            "block_type": "HEADING_1",
+            "spans": [
+              {
+                "text": "Domain 4: Communication and Network Security",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Exam weight: about 13%",
+                "bold": false,
+                "highlighted": true
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Summary",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Designing and protecting network architectures and channels: OSI and TCP/IP models, secure protocols, network components (firewalls, IDS/IPS, proxies), segmentation, wireless, remote access and converged communications.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Key ideas",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Know which layer each protocol, device and attack operates at. Segment networks and secure every channel end to end.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d4-osi": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "OSI: Physical, Data Link, Network, Transport, Session, Presentation, Application (\"Please Do Not Throw Sausage Pizza Away\").",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "TCP/IP: Link, Internet, Transport, Application. IPv4 vs IPv6.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d4-proto": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "TLS, IPsec (AH for integrity, ESP for confidentiality; transport vs tunnel mode), SSH, SFTP, DNSSEC, SNMPv3, S/MIME.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d4-comp": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Firewalls (packet filter, stateful, application/proxy, NGFW, WAF), IDS/IPS, NAC, proxies, load balancers.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Transmission media and endpoint security.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d4-design": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Segmentation, DMZs, VLANs, micro-segmentation, ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "zero trust",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", SDN, SD-WAN, CDNs.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Converged protocols: FCoE, iSCSI, VoIP.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d4-wire": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Wi-Fi: ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "WPA3",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " (SAE), WPA2-Enterprise with 802.1X/EAP. Bluetooth, cellular, satellite.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Remote access: VPNs, VDI, jump boxes. Attacks: evil twin, MITM, DDoS, spoofing.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d5": {
+        "blocks": [
+          {
+            "block_type": "HEADING_1",
+            "spans": [
+              {
+                "text": "Domain 5: Identity and Access Management (IAM)",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Exam weight: about 13%",
+                "bold": false,
+                "highlighted": true
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Summary",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Controlling who can access what: identification, authentication, authorization and accountability (",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "IAAA",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": "), identity lifecycle, federation, access control models, and protecting physical and logical access to assets.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Key ideas",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Every subject is uniquely identified, strongly authenticated, granted least privilege, and held accountable through logging.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d5-authn": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Factors: something you ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "know",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "have",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "are",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " (plus somewhere you are, something you do). MFA uses different factor types.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Biometrics: FRR (Type I), FAR (Type II), ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "CER/EER",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " for comparison. Passwordless, passkeys.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d5-models": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "DAC",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " (owner decides), ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "MAC",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " (labels/clearances), ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "RBAC",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " (roles), rule-based, ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "ABAC",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " (attributes), risk-based.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d5-fed": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "SAML (XML, enterprise web SSO), ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "OAuth 2.0",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " (authorization), ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "OpenID Connect",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " (authentication on top of OAuth), Kerberos (tickets, KDC).",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Identity as a Service (IDaaS), just-in-time access.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d5-life": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Provisioning, review, revocation/deprovisioning. Periodic access reviews prevent ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "privilege creep",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ".",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Privileged access management (PAM), service accounts.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d5-attacks": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Password attacks (brute force, dictionary, rainbow tables: defend with salting), credential stuffing, phishing, pass-the-hash, session hijacking.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d6": {
+        "blocks": [
+          {
+            "block_type": "HEADING_1",
+            "spans": [
+              {
+                "text": "Domain 6: Security Assessment and Testing",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Exam weight: about 12%",
+                "bold": false,
+                "highlighted": true
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Summary",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Verifying that controls work as intended: designing assessment and audit strategies, vulnerability scanning, penetration testing, log reviews, code testing, collecting security process data (KPIs/KRIs), and reporting findings to management.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Key ideas",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Testing must be authorized, scoped and planned. Results only add value when they are analyzed and reported to the people who can act on them.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d6-strat": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Internal, external and third-party audits. SOC reports: ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "SOC 1",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " (financial), ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "SOC 2",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " (security controls, Type I = design at a point in time, Type II = operating effectiveness over time), SOC 3 (public).",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d6-vuln": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Scanning (credentialed vs non-credentialed), CVE, ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "CVSS",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " scoring, false positives/negatives, patch verification.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d6-pentest": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Phases: planning, discovery, attack, reporting. Black, gray and white box. Red, blue and purple teams.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Always get written permission and agree the rules of engagement.",
+                "bold": false,
+                "highlighted": true
+              }
+            ]
+          }
+        ]
+      },
+      "d6-code": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "SAST (static), DAST (dynamic), IAST, fuzzing, code review, misuse-case testing, test coverage, interface testing, synthetic transactions, RUM.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d6-data": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Account management, backup verification, training metrics, KPIs and KRIs, DR/BC test results.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Report findings, remediation and exception handling to management.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d7": {
+        "blocks": [
+          {
+            "block_type": "HEADING_1",
+            "spans": [
+              {
+                "text": "Domain 7: Security Operations",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Exam weight: about 13%",
+                "bold": false,
+                "highlighted": true
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Summary",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Running security day to day: investigations and forensics, logging and monitoring, configuration and change management, foundational operations concepts, incident management, patching, recovery strategies, ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "disaster recovery",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " and BC exercises, physical security and personnel safety.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Key ideas",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Prepare, detect, respond, recover and learn. Preserve evidence and the chain of custody.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d7-inv": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Evidence collection in ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "order of volatility",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", chain of custody, admissibility. Investigation types: administrative, criminal, civil, regulatory.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d7-mon": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "SIEM, SOAR, continuous monitoring, UEBA, threat intelligence and threat hunting, egress monitoring.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d7-ir": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Detection, response, mitigation, reporting, recovery, remediation, ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "lessons learned",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ".",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d7-ops": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Need to know, least privilege, separation of duties, job rotation, privileged account monitoring, SLAs.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Configuration and change management, patch and vulnerability management, anti-malware, sandboxing, honeypots.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d7-dr": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Backups (full, incremental, differential), sites (",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "hot, warm, cold",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", mobile, cloud), RAID, clustering.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "DR tests: read-through/checklist, walkthrough/tabletop, simulation, parallel, ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "full interruption (most disruptive)",
+                "bold": false,
+                "highlighted": true
+              },
+              {
+                "text": ".",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d8": {
+        "blocks": [
+          {
+            "block_type": "HEADING_1",
+            "spans": [
+              {
+                "text": "Domain 8: Software Development Security",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Exam weight: about 10%",
+                "bold": false,
+                "highlighted": true
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Summary",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Building security into software from the start: security in the SDLC, development methodologies, maturity models, secure coding, the security of the development environment and tooling, and the risk of acquired and third-party software.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "HEADING_2",
+            "spans": [
+              {
+                "text": "Key ideas",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Shift left:",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": " it is far cheaper to fix a flaw in design than in production.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d8-sdlc": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Waterfall, Agile, Scrum, DevOps and ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "DevSecOps",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ", CI/CD. Maturity models: CMMI, SAMM, BSIMM.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Change management and integrated product teams.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d8-code": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Input validation, output encoding, parameterized queries, error handling, secure APIs.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          },
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Common flaws: ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "OWASP Top 10",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ": injection, XSS, CSRF, broken access control, buffer overflows.",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d8-env": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Code repositories, IDE and build pipeline security, secrets management, application security testing tools (SAST, DAST, SCA).",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d8-acq": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "COTS, open source, third-party libraries, cloud services. Software composition analysis (SCA) and the ",
+                "bold": false,
+                "highlighted": false
+              },
+              {
+                "text": "SBOM",
+                "bold": true,
+                "highlighted": false
+              },
+              {
+                "text": ".",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      },
+      "d8-db": {
+        "blocks": [
+          {
+            "block_type": "PARAGRAPH",
+            "spans": [
+              {
+                "text": "Database security: aggregation, inference, polyinstantiation, ACID. Emerging risks in AI/ML systems (data poisoning, model theft).",
+                "bold": false,
+                "highlighted": false
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+]
