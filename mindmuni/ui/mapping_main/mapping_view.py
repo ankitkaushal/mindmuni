@@ -41,7 +41,7 @@ class MappingView(View):
         self._canvas = self._create_scrollable_canvas()
         self._canvas.on_node_click(self._on_node_click)
         self._canvas.on_node_double_click(self._on_node_double_click)
-        self._canvas.on_before_zoom(self._finish_editing)
+        self._canvas.on_before_zoom(self.finish_editing)
         self._canvas.on_zoom_changed(self._update_view_toolbar)
         self._layout = TreeLayout(self._canvas.measure_node)
         self._title_editor = TitleEditor(
@@ -75,16 +75,23 @@ class MappingView(View):
         """Changes the shown map's layout style (RIGHT or BALANCED) and redraws it around the root."""
         if self._mind_map is None or self._mind_map.style.layout is layout:
             return
-        self._finish_editing()
+        self.finish_editing()
         self._mind_map.style.layout = layout
         self._redraw()
         self.after_idle(lambda: self._canvas.center_on(self._mind_map.root.position))
 
     # --- editing ------------------------------------------------------------
 
+    def finish_editing(self) -> None:
+        """Closes the title editor if it is open, saving what was typed into the map. Call it before saving the map."""
+        self._title_editor.finish()
+
+    def on_hide(self) -> None:
+        self.finish_editing()
+
     def insert_node(self) -> None:
         """Adds a child to the selected node, selects it and opens its title for editing, ready to type over."""
-        self._finish_editing()
+        self.finish_editing()
         selected = self._selected_node()
         if selected is None:
             return
@@ -96,7 +103,7 @@ class MappingView(View):
 
     def edit_selected_title(self, select_all: bool = False) -> None:
         """Opens the selected node's title for editing in place. Enter saves, Shift+Enter adds a line, Esc cancels."""
-        self._finish_editing()
+        self.finish_editing()
         selected = self._selected_node()
         if selected is None:
             return
@@ -104,7 +111,7 @@ class MappingView(View):
 
     def delete_selected_node(self) -> None:
         """Deletes the selected node with its subtree and selects its parent. Does nothing for the root."""
-        self._finish_editing()
+        self.finish_editing()
         selected = self._selected_node()
         if selected is None or not self._editor.can_delete(self._mind_map, selected.node_id):
             return
@@ -116,7 +123,7 @@ class MappingView(View):
 
     def set_selected_color(self, color: NodeColor) -> None:
         """Changes the selected node's colour. Sizes don't change, so the map is only redrawn."""
-        self._finish_editing()
+        self.finish_editing()
         selected = self._selected_node()
         if selected is None or not self._editor.set_color(self._mind_map, selected.node_id, color):
             return
@@ -125,7 +132,7 @@ class MappingView(View):
 
     def set_selected_shape(self, shape: NodeShape) -> None:
         """Changes the selected node's shape. Its size can change, so the layout runs again with the node kept in place."""
-        self._finish_editing()
+        self.finish_editing()
         selected = self._selected_node()
         if selected is None:
             return
@@ -163,7 +170,7 @@ class MappingView(View):
         return self._canvas.drag_enabled
 
     def apply_theme(self, theme: Theme) -> None:
-        self._finish_editing()
+        self.finish_editing()
         self._theme = theme
         self._canvas.apply_theme(theme)
         self._toolbar.apply_theme(theme)
@@ -176,7 +183,7 @@ class MappingView(View):
     def _on_node_click(self, node_id: str | None) -> None:
         if node_id is not None and node_id == self._title_editor.node_id:
             return  # a click on the title being edited keeps editing
-        self._finish_editing()
+        self.finish_editing()
         if self._mind_map is None or node_id == self._selection.selected_id:
             return
         self._selection.select(node_id)
@@ -190,9 +197,6 @@ class MappingView(View):
             self._on_node_click(node_id)
         self.edit_selected_title()
 
-    def _finish_editing(self) -> None:
-        """Closes the title editor if it is open, saving what was typed."""
-        self._title_editor.finish()
 
     def _rename_node(self, node_id: str, title: str) -> None:
         """Saves an edited title. The node's size can change, so the layout runs again with the node kept in place."""
