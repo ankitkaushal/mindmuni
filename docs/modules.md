@@ -10,6 +10,7 @@ editor), **utils**, **file**, **model** and **core**. Classes are described in
 MindMuni/
 ├── main.py                         # Entry point: builds the app and runs mainloop
 ├── map_preview.py                  # Standalone mapping-component preview (hard-coded map file)
+├── text_editor_preview.py          # Standalone text-editor preview (hard-coded map file)
 ├── themes/                         # Built-in theme JSON files
 │   ├── dark.json
 │   └── light.json
@@ -79,9 +80,8 @@ MindMuni/
     │   │
     │   └── text_editor/            # Node text component
     │       ├── __init__.py
-    │       ├── text_editor_view.py # TextEditorView (+ Back button)
-    │       ├── formatting_toolbar.py
-    │       └── rich_text_adapter.py
+    │       ├── text_editor_view.py # TextEditorView (tk.Text + scrollbar)
+    │       └── rich_text_adapter.py # NoteDocument <-> tk.Text tags
     │
     └── utils/                      # Small helpers with no domain knowledge
         ├── __init__.py
