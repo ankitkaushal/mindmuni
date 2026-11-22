@@ -4,6 +4,7 @@ from mindmuni.ui.core.menu_bar import FileCommands, MenuBar, ThemeCommands
 from mindmuni.ui.core.shortcut_map import Shortcut, ShortcutMap
 from mindmuni.ui.core.status_bar import StatusBar
 from mindmuni.ui.core.theme_styler import ThemeStyler
+from mindmuni.ui.core.toolbar_button import create_toolbar_button, style_toolbar_button
 from mindmuni.ui.core.view import View
 from mindmuni.ui.core.view_navigator import ViewNavigator
 
@@ -19,4 +20,6 @@ __all__ = [
     "ThemeStyler",
     "View",
     "ViewNavigator",
+    "create_toolbar_button",
+    "style_toolbar_button",
 ]

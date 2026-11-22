@@ -62,6 +62,7 @@ MindMuni/
     │   │   ├── view_navigator.py   # ViewNavigator
     │   │   ├── shortcut_map.py     # ShortcutMap
     │   │   ├── theme_styler.py     # ThemeStyler
+    │   │   ├── toolbar_button.py   # Flat themed toolbar buttons shared by all views
     │   │   ├── status_bar.py       # StatusBar
     │   │   ├── dialogs.py          # Open/save file dialogs, unsaved-changes prompt
     │   │   └── placeholder_view.py # Temporary stand-in view

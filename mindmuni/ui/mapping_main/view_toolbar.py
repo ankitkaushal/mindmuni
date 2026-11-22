@@ -2,7 +2,8 @@ import tkinter as tk
 from collections.abc import Callable
 
 from mindmuni.model.theme import Theme
-from mindmuni.ui.mapping_main.map_toolbar import TOOLBAR_MARGIN, create_toolbar_button, style_toolbar_button
+from mindmuni.ui.core.toolbar_button import create_toolbar_button, style_toolbar_button
+from mindmuni.ui.mapping_main.map_toolbar import TOOLBAR_MARGIN
 
 ZOOM_LABEL_WIDTH = 5  # characters; fits "300%", so the toolbar doesn't resize as the zoom changes
 DRAG_LABEL_WIDTH = 9  # characters; fits both drag labels, so the toolbar doesn't resize when toggled

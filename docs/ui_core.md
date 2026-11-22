@@ -38,6 +38,7 @@ sudo apt install python3-tk      # Ubuntu/Debian only; Windows/macOS python.org 
 | `theme_styler.py` | `ThemeStyler` translates a model `Theme` into `ttk.Style` settings on top of the `clam` ttk theme. It styles the root background, general widgets, buttons, the status bar, and the `Heading1.TLabel` / `Heading2.TLabel` label styles. |
 | `status_bar.py` | `StatusBar` is a one-line message area: `show_message(text)` and `clear()`. |
 | `dialogs.py` | `Dialogs` wraps Tk's standard dialogs so other code never calls `filedialog` or `messagebox` directly: `ask_map_to_open()`, `ask_map_save_path(name)`, `ask_theme_to_open()`, `confirm_discard_changes()` (Yes/No/Cancel → `True`/`False`/`None`) and `show_error()`. |
+| `toolbar_button.py` | `create_toolbar_button(parent, text, command)` makes a flat `tk.Button` and `style_toolbar_button(button, theme)` colours it from the theme. Shared by the mapping view's toolbars and, next, the text editor's. |
 | `placeholder_view.py` | `PlaceholderView` and `PlaceholderAction` are a temporary screen with a title, description and buttons. They stand in for the mapping view and the text editor until those exist. |
 | `__init__.py` | Re-exports the public UI shell classes (`from mindmuni.ui.core import MainWindow, ...`). |
 
