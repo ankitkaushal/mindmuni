@@ -24,7 +24,7 @@ class MappingView(View):
 
     The edit toolbar floats over the canvas's bottom-right corner, the style toolbar (colour and shape) over its
     bottom-left corner and the view toolbar (zoom and the drag lock) over its top-right corner; all stay there
-    when the window is resized. Dragging the map around is locked until the view toolbar's Drag button turns it on.
+    when the window is resized. They are hidden until the first map is shown. Dragging the map around is locked until the view toolbar's Drag button turns it on.
 
     A node's title is edited in place (double-click, F2 or the Edit button), by typing into its drawn text.
     The Edit button is disabled while a title is being edited.
@@ -50,9 +50,7 @@ class MappingView(View):
         self._toolbar = MapToolbar(
             self, on_insert=self.insert_node, on_edit=self.edit_selected_title, on_delete=self.delete_selected_node
         )
-        self._toolbar.pin_to(self._canvas)
         self._style_toolbar = StyleToolbar(self, on_color=self.set_selected_color, on_shape=self.set_selected_shape)
-        self._style_toolbar.pin_to(self._canvas)
         self._view_toolbar = ViewToolbar(
             self,
             on_zoom_out=self.zoom_out,
@@ -60,7 +58,6 @@ class MappingView(View):
             on_zoom_in=self.zoom_in,
             on_toggle_drag=self.toggle_drag,
         )
-        self._view_toolbar.pin_to(self._canvas)
         self._update_view_toolbar()
         self._theme = theme
         self.apply_theme(theme)
@@ -69,6 +66,7 @@ class MappingView(View):
         """Shows the map with its root selected, centred on the root."""
         self._title_editor.cancel()  # the node being edited belongs to the old map
         self._mind_map = mind_map
+        self._show_toolbars()
         self._selection.select(mind_map.root.node_id)
         self._redraw()
         self.after_idle(lambda: self._canvas.center_on(mind_map.root.position))
@@ -223,6 +221,11 @@ class MappingView(View):
         """
         self._redraw()
         self._canvas.scroll_point_to(node.position, *window_point)
+
+    def _show_toolbars(self) -> None:
+        """Pins the toolbars over the canvas. They stay hidden until the first map is shown."""
+        for toolbar in (self._toolbar, self._style_toolbar, self._view_toolbar):
+            toolbar.pin_to(self._canvas)
 
     def _update_view_toolbar(self) -> None:
         canvas = self._canvas

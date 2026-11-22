@@ -5,6 +5,9 @@ from pathlib import Path
 from mindmuni.core.builtin_themes import builtin_themes
 from mindmuni.core.events import EventBus, Events
 from mindmuni.core.theme_manager import ThemeManager
+from mindmuni.file.json_file_store import JsonFileStore
+from mindmuni.file.map_repository import MapRepository
+from mindmuni.file.map_serializer import MapSerializer
 from mindmuni.model.theme import Theme
 from mindmuni.ui.core.dialogs import Dialogs
 from mindmuni.ui.core.main_window import MainWindow
@@ -14,9 +17,9 @@ from mindmuni.ui.core.shortcut_map import ShortcutMap
 from mindmuni.ui.core.theme_styler import ThemeStyler
 from mindmuni.ui.core.view import View
 from mindmuni.ui.core.view_navigator import ViewNavigator
+from mindmuni.ui.mapping_main.mapping_view import MAP_VIEW_ID, MappingView
 from mindmuni.utils.paths import maps_dir
 
-MAP_VIEW_ID = "map"
 TEXT_EDITOR_VIEW_ID = "text_editor"
 UNTITLED_MAP_TITLE = "Untitled map"
 
@@ -37,6 +40,7 @@ class MindMuniApp:
     def _create_core(self) -> None:
         self._event_bus = EventBus()
         self._theme_manager = ThemeManager(self._event_bus, builtin_themes())
+        self._map_repository = MapRepository(JsonFileStore(), MapSerializer())
 
     def _create_ui(self) -> None:
         self._window = MainWindow()
@@ -63,18 +67,9 @@ class MindMuniApp:
         return MenuBar(self._window.root, file_commands, theme_commands, self._theme_manager.available_names())
 
     def _register_views(self) -> None:
-        for view in (self._create_map_placeholder(), self._create_text_editor_placeholder()):
+        self._mapping_view = MappingView(self._window.view_container, self._theme_manager.current_theme)
+        for view in (self._mapping_view, self._create_text_editor_placeholder()):
             self._navigator.register(view)
-
-    def _create_map_placeholder(self) -> View:
-        open_editor = PlaceholderAction("Open text editor →", lambda: self._navigator.show(TEXT_EDITOR_VIEW_ID, "Root node"))
-        return PlaceholderView(
-            self._window.view_container,
-            MAP_VIEW_ID,
-            title="Mapping view",
-            description="The mind-map canvas will live here.",
-            actions=[open_editor],
-        )
 
     def _create_text_editor_placeholder(self) -> View:
         back = PlaceholderAction("← Back to map", self._navigator.back)
@@ -109,12 +104,13 @@ class MindMuniApp:
     def _on_theme_changed(self, theme: Theme) -> None:
         self._styler.apply(theme)
         self._menu_bar.apply_theme(theme)
+        self._mapping_view.apply_theme(theme)
         self._window.status_bar.show_message(f"Theme: {theme.name}")
 
     def _on_view_changed(self, view: View) -> None:
         self._window.status_bar.show_message(f"View: {view.view_id}")
 
-    # --- menu commands (placeholders until DocumentSession exists) ----------
+    # --- menu commands (only Open is real; the rest wait for DocumentSession) --
 
     def _new_map(self) -> None:
         self._window.set_document_title(UNTITLED_MAP_TITLE)
@@ -123,8 +119,17 @@ class MindMuniApp:
 
     def _open_map(self) -> None:
         path = self._dialogs.ask_map_to_open()
-        if path is not None:
-            self._report_not_implemented("Open", path)
+        if path is None:
+            return
+        try:
+            mind_map = self._map_repository.load(path)
+        except (OSError, ValueError) as error:  # ValueError covers bad JSON and MapFormatError
+            self._dialogs.show_error("Open map", f"Could not open {path.name}:\n{error}")
+            return
+        self._navigator.reset_to(MAP_VIEW_ID)
+        self._mapping_view.show_map(mind_map)
+        self._window.set_document_title(mind_map.title)
+        self._window.status_bar.show_message(f"Opened {path.name}")
 
     def _save_map(self) -> None:
         self._save_map_as()

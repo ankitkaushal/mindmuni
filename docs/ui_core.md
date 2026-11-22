@@ -24,7 +24,7 @@ sudo apt install python3-tk      # Ubuntu/Debian only; Windows/macOS python.org 
 | File | Contains |
 |------|----------|
 | `main.py` | `main()` creates `MindMuniApp` and calls `run()`. Nothing else. |
-| `mindmuni/app.py` | `MindMuniApp`, the **composition root**. It is the only place that creates concrete objects and connects them. It builds the core services and the UI, registers views, subscribes to events, binds global shortcuts and shows the first view. It also holds the File-menu handlers, which are placeholders for now. |
+| `mindmuni/app.py` | `MindMuniApp`, the **composition root**. It is the only place that creates concrete objects and connects them. It builds the core services and the UI, registers views, subscribes to events, binds global shortcuts and shows the first view. It also holds the File-menu handlers: Open loads the chosen `.mson` file through `MapRepository` and shows it in the `MappingView` (errors are shown with `Dialogs.show_error()`); the others are still placeholders. |
 
 ### `mindmuni/ui/core/`: Tkinter widgets
 
@@ -123,9 +123,9 @@ navigator.back() / Esc               → previous view restored with its origina
 
 | Item | Current behaviour | Replaced by |
 |------|-------------------|-------------|
-| Open / Save / Save As | Show the file dialog, then report the chosen path in the status bar | `DocumentSession` plus `MapRepository` |
+| Save / Save As | Show the file dialog, then report the chosen path in the status bar | `DocumentSession` plus `MapRepository` |
 | Save | Always asks for a path, like Save As | `DocumentSession`, which tracks the current file path |
 | Theme → Custom… | Reports the chosen file only | `ThemeRepository.load_custom()` |
 | Quit | Closes without asking about unsaved changes | A dirty check plus `Dialogs.confirm_discard_changes()` |
 | Built-in themes | Defined in Python | `themes/dark.json` and `themes/light.json` |
-| `"map"` / `"text_editor"` views | `PlaceholderView` | `MappingView` and `TextEditorView` |
+| `"text_editor"` view | `PlaceholderView` | `TextEditorView` |
