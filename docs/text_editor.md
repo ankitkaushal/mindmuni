@@ -4,7 +4,8 @@ The text editor edits one node's note (a `NoteDocument`): headings, paragraphs,
 bold and highlighted text. A fixed toolbar above the text sets each line's
 block type and toggles bold and highlight on the selection. It can run on its own through
 `text_editor_preview.py`, without the main window or menu bar described in
-[ui_core.md](ui_core.md). It isn't wired into the app yet.
+[ui_core.md](ui_core.md). In the app it opens beside the map with the map's
+**Text** button (see [mapping_ui.md](mapping_ui.md)).
 
 See [object_model.md](object_model.md) for `NoteDocument`, `TextBlock`,
 `TextSpan` and `BlockType`, and
@@ -66,7 +67,7 @@ Edits are never written to the file.
 | File | Contains |
 |------|----------|
 | `text_editor_preview.py` | `TextEditorPreview`: a bare `tk.Tk` window with a `TextEditorView`, loading `MAP_FILE` through `MapRepository`, with the F5–F8 keys above. A test harness only. |
-| `mindmuni/ui/text_editor/text_editor_view.py` | `TextEditorView` is a `View` subclass: the `FormattingToolbar` across the top, a one-pixel border, then a `tk.Text` with a vertical scrollbar. `show_note(note)` loads a note with the cursor at the start and an empty undo history; `note()` returns the text as a new `NoteDocument` (the view never changes a node); `set_block_type(block_type)` changes the cursor's or selected lines; `toggle_format(inline_format)` toggles bold or highlight on the selection; `apply_theme(theme)` colours the text area, its tags and the toolbar. It binds `Ctrl+1/2/0` and `Ctrl+B/H` on the text widget, overrides `Enter` at the end of a heading, and refreshes the toolbar after key and mouse releases (Tk has no cursor-moved event). `TEXT_EDITOR_VIEW_ID` is `"text_editor"`. |
+| `mindmuni/ui/text_editor/text_editor_view.py` | `TextEditorView` is a `View` subclass: the `FormattingToolbar` across the top, a one-pixel border, then a `tk.Text` with a vertical scrollbar. `show_note(note, focus=True)` loads a note with the cursor at the start and an empty undo history, taking the keyboard focus unless `focus` is false; `note()` returns the text as a new `NoteDocument` (the view never changes a node); `set_block_type(block_type)` changes the cursor's or selected lines; `toggle_format(inline_format)` toggles bold or highlight on the selection; `apply_theme(theme)` colours the text area, its tags and the toolbar. It binds `Ctrl+1/2/0` and `Ctrl+B/H` on the text widget, overrides `Enter` at the end of a heading, and refreshes the toolbar after key and mouse releases (Tk has no cursor-moved event). `TEXT_EDITOR_VIEW_ID` is `"text_editor"`. |
 | `mindmuni/ui/text_editor/formatting_toolbar.py` | `FormattingToolbar` is a plain `tk.Frame` bar, `[H1 H2 Normal] \| [Bold Highlight]`, made with the shared `create_toolbar_button()` / `style_toolbar_button()`. A click calls `on_block_type(block_type)` or `on_inline_format(inline_format)`. `show_block_type(block_type or None)` highlights the current block type and `show_inline_formats(active, enabled)` highlights the active formats and greys out Bold and Highlight when `enabled` is false. Highlighting uses `highlight_background`, like the map's **Drag: On**. |
 | `mindmuni/ui/text_editor/rich_text_adapter.py` | `RichTextAdapter` converts between a `NoteDocument` and the `tk.Text`'s content and tags. A line's block type is the tag `"HEADING_1"` or `"HEADING_2"` on its newline (paragraphs carry none); the line's characters get the same tag for the heading font, and `normalize_blocks()` (run by the view after each edit) re-applies it. Inline formatting uses `"bold"` and `"highlighted"`, the values of the `InlineFormat` enum; `has_format(inline_format, start, end)` and `toggle_format(inline_format, start, end)` work on a range, skipping newlines, and `normalize_blocks()` also strips them from newlines. Also `load(note)`, `dump()`, `block_type_at(index)`, `set_block_type(first_line, last_line, block_type)` and `line_count()`. Heading tags are created after `bold` so their font wins; `sel` is raised so selections show over highlights. |
 | `mindmuni/ui/text_editor/__init__.py` | Re-exports `TextEditorView`, `FormattingToolbar`, `RichTextAdapter`, `InlineFormat` and `TEXT_EDITOR_VIEW_ID`. |
@@ -81,7 +82,5 @@ current block type and active formats and `connector_line` for its separator, an
 ## 3. Not yet implemented
 - `Ctrl+B` / `Ctrl+H` with no selection to make the next typed text bold or
   highlighted.
-- A Back button.
-- Wiring into the app: registering `TextEditorView` in place of the
-  `"text_editor"` placeholder, opening it from a node, and writing the edited
-  note back to the node.
+- Tracking unsaved note edits (the app doesn't track unsaved changes at all
+  yet).

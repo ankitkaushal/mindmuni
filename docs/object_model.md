@@ -152,7 +152,7 @@ know nothing about Tkinter widgets.
 | Class               | Responsibility                                                                 |
 |---------------------|--------------------------------------------------------------------------------|
 | `MapFactory`        | `create_new_map(title)` returns a `MindMap` with a default root node            |
-| `MapEditor`         | Edits the map: `add_child`, `add_sibling`, `rename_node`, `delete_node`, `set_shape`, `set_color` |
+| `MapEditor`         | Edits the map: `add_child`, `add_sibling`, `rename_node`, `delete_node`, `set_shape`, `set_color`, `set_note` |
 | `SelectionManager`  | Tracks the selected node. Provides `select_parent/first_child/next_sibling/previous_sibling` for keyboard navigation |
 | `TreeLayout`        | Computes `Node.position` for every node, right-only or balanced per `MapStyle.layout` |
 | `ThemeManager`      | Holds the current `Theme`, switches dark/light/custom, notifies subscribers     |

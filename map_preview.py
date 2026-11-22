@@ -4,11 +4,13 @@ Loads the hard-coded map file below and draws it.
 Keys: T toggles light/dark theme, L toggles right/balanced layout, R reloads the file from disk,
 Ctrl+plus / Ctrl+minus zoom in and out, Ctrl+0 resets the zoom,
 Insert adds a child to the selected node, F2 edits its title, Delete deletes it (edits are not saved).
+These keys are ignored while typing in the text area (opened with the view toolbar's Text button).
 Mouse: click a node to select it, double-click it to edit its title, use the bottom-left toolbar to change its colour and shape, drag empty space (or middle-drag) to pan, wheel to scroll
 (Shift+wheel scrolls sideways, Ctrl+wheel zooms around the pointer).
 """
 
 import tkinter as tk
+from collections.abc import Callable
 
 from mindmuni.core.builtin_themes import dark_theme, light_theme
 from mindmuni.file.json_file_store import JsonFileStore
@@ -16,7 +18,7 @@ from mindmuni.file.map_repository import MapRepository
 from mindmuni.file.map_serializer import MapSerializer
 from mindmuni.model.map_style import MapLayout
 from mindmuni.model.mind_map import MindMap
-from mindmuni.ui.core.shortcut_map import ShortcutMap
+from mindmuni.ui.core.shortcut_map import Shortcut, ShortcutMap
 from mindmuni.ui.mapping_main.mapping_view import MappingView
 from mindmuni.utils.paths import maps_dir
 
@@ -45,15 +47,27 @@ class MapPreview:
         return root
 
     def _bind_keys(self) -> None:
-        self._root.bind("<KeyPress-t>", lambda _event: self._toggle_theme())
-        self._root.bind("<KeyPress-l>", lambda _event: self._toggle_layout())
-        self._root.bind("<KeyPress-r>", lambda _event: self._reload_map())
-        ShortcutMap.bind_local(self._root, ShortcutMap.ZOOM_IN, self._view.zoom_in)
-        ShortcutMap.bind_local(self._root, ShortcutMap.ZOOM_OUT, self._view.zoom_out)
-        ShortcutMap.bind_local(self._root, ShortcutMap.RESET_ZOOM, self._view.reset_zoom)
-        ShortcutMap.bind_local(self._root, ShortcutMap.INSERT_NODE, self._view.insert_node)
-        ShortcutMap.bind_local(self._root, ShortcutMap.DELETE_NODE, self._view.delete_selected_node)
-        ShortcutMap.bind_local(self._root, ShortcutMap.EDIT_TITLE, self._view.edit_selected_title)
+        self._bind_map_key(Shortcut(("<KeyPress-t>",), "T"), self._toggle_theme)
+        self._bind_map_key(Shortcut(("<KeyPress-l>",), "L"), self._toggle_layout)
+        self._bind_map_key(Shortcut(("<KeyPress-r>",), "R"), self._reload_map)
+        self._bind_map_key(ShortcutMap.ZOOM_IN, self._view.zoom_in)
+        self._bind_map_key(ShortcutMap.ZOOM_OUT, self._view.zoom_out)
+        self._bind_map_key(ShortcutMap.RESET_ZOOM, self._view.reset_zoom)
+        self._bind_map_key(ShortcutMap.INSERT_NODE, self._view.insert_node)
+        self._bind_map_key(ShortcutMap.DELETE_NODE, self._view.delete_selected_node)
+        self._bind_map_key(ShortcutMap.EDIT_TITLE, self._view.edit_selected_title)
+
+    def _bind_map_key(self, shortcut: Shortcut, action: Callable[[], None]) -> None:
+        """Binds a key on the window, except while typing in the text area, where the key is the text's."""
+
+        def handle(event: tk.Event) -> str | None:
+            if isinstance(event.widget, tk.Text):
+                return None
+            action()
+            return "break"
+
+        for sequence in shortcut.sequences:
+            self._root.bind(sequence, handle)
 
     def _reload_map(self) -> None:
         mind_map = self._repository.load(MAP_FILE)

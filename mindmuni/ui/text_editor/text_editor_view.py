@@ -33,11 +33,13 @@ class TextEditorView(View):
         self._bind_keys()
         self.apply_theme(theme)
 
-    def show_note(self, note: NoteDocument) -> None:
-        """Shows the note with the cursor at the start, ready for typing. Undo history starts empty."""
+    def show_note(self, note: NoteDocument, focus: bool = True) -> None:
+        """Shows the note with the cursor at the start. Undo history starts empty. With `focus`, the text takes
+        the keyboard focus, ready for typing; without it, focus stays where it is (e.g. on the map)."""
         self._adapter.load(note)
         self._text.see("1.0")
-        self._text.focus_set()
+        if focus:
+            self._text.focus_set()
         self._update_toolbar()
 
     def note(self) -> NoteDocument:

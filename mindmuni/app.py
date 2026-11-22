@@ -14,7 +14,6 @@ from mindmuni.model.theme import Theme
 from mindmuni.ui.core.dialogs import Dialogs
 from mindmuni.ui.core.main_window import MainWindow
 from mindmuni.ui.core.menu_bar import FileCommands, MenuBar, ThemeCommands
-from mindmuni.ui.core.placeholder_view import PlaceholderAction, PlaceholderView
 from mindmuni.ui.core.shortcut_map import ShortcutMap
 from mindmuni.ui.core.theme_styler import ThemeStyler
 from mindmuni.ui.core.view import View
@@ -22,7 +21,6 @@ from mindmuni.ui.core.view_navigator import ViewNavigator
 from mindmuni.ui.mapping_main.mapping_view import MAP_VIEW_ID, MappingView
 from mindmuni.utils.paths import maps_dir
 
-TEXT_EDITOR_VIEW_ID = "text_editor"
 UNTITLED_MAP_TITLE = "Untitled map"
 NEW_ROOT_TITLE = "Central idea"
 
@@ -73,18 +71,7 @@ class MindMuniApp:
 
     def _register_views(self) -> None:
         self._mapping_view = MappingView(self._window.view_container, self._theme_manager.current_theme)
-        for view in (self._mapping_view, self._create_text_editor_placeholder()):
-            self._navigator.register(view)
-
-    def _create_text_editor_placeholder(self) -> View:
-        back = PlaceholderAction("← Back to map", self._navigator.back)
-        return PlaceholderView(
-            self._window.view_container,
-            TEXT_EDITOR_VIEW_ID,
-            title="Text editor",
-            description="The node's note editor will live here.\nPress Esc or Back to return.",
-            actions=[back],
-        )
+        self._navigator.register(self._mapping_view)  # the text editor opens beside the map, inside this view
 
     def _subscribe_to_events(self) -> None:
         self._event_bus.subscribe(Events.THEME_CHANGED, self._on_theme_changed)
@@ -166,7 +153,7 @@ class MindMuniApp:
 
     def _write_map(self, path: Path) -> None:
         """Saves the map to `path`, which becomes its file from now on. Shows an error if writing fails."""
-        self._mapping_view.finish_editing()  # a title being typed belongs in the saved file
+        self._mapping_view.finish_editing()  # a title or note being typed belongs in the saved file
         try:
             self._map_repository.save(self._mind_map, path)
         except OSError as error:

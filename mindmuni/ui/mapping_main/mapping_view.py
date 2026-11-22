@@ -4,6 +4,7 @@ from tkinter import ttk
 from mindmuni.core.map_editor import MapEditor
 from mindmuni.core.selection_manager import SelectionManager
 from mindmuni.core.tree_layout import TreeLayout
+from mindmuni.model.geometry import Point
 from mindmuni.model.map_style import MapLayout
 from mindmuni.model.mind_map import MindMap
 from mindmuni.model.node import Node
@@ -15,8 +16,13 @@ from mindmuni.ui.mapping_main.map_toolbar import MapToolbar
 from mindmuni.ui.mapping_main.style_toolbar import StyleToolbar
 from mindmuni.ui.mapping_main.title_editor import TitleEditor
 from mindmuni.ui.mapping_main.view_toolbar import ViewToolbar
+from mindmuni.ui.text_editor.text_editor_view import TextEditorView
 
 MAP_VIEW_ID = "map"
+TEXT_TO_MAP_WIDTH = 1 / 3  # the text area opens a third as wide as the map
+TEXT_BORDER_WIDTH = 1
+KEEP_MAP_STILL_MS = 500  # how long after opening or closing the text area the map's scroll is held
+CANVAS_COLUMN, TEXT_BORDER_COLUMN, TEXT_COLUMN = 0, 2, 3  # column 1 is the map's vertical scrollbar
 
 
 class MappingView(View):
@@ -29,6 +35,13 @@ class MappingView(View):
     A node's title is edited in place (double-click, F2 or the Edit button), by typing into its drawn text.
     The Edit button is disabled while a title is being edited.
     Every action that redraws first stops editing and saves what was typed, because a redraw replaces that text.
+
+    The view toolbar's Text button opens the selected node's note in a TextEditorView to the right of the map,
+    a third as wide as the map. The window grows to the right by that much, so everything already on screen,
+    the map included, stays where it is; it shrinks back the same way when the text area closes. The text area
+    keeps that width; if the window is resized while it is open, the map takes the change. Selecting another node shows its note; clicking empty space keeps the last
+    one. The edited note is stored in its node by finish_editing(), which every action (and the app, before
+    saving the file) calls first, and when the text area closes.
     """
 
     def __init__(
@@ -57,7 +70,16 @@ class MappingView(View):
             on_reset=self.reset_zoom,
             on_zoom_in=self.zoom_in,
             on_toggle_drag=self.toggle_drag,
+            on_toggle_text=self.toggle_text,
         )
+        self._text_editor = TextEditorView(self, theme)
+        self._text_editor.grid_propagate(False)  # its width is set when it opens, not by its contents
+        self._text_border = tk.Frame(self, width=TEXT_BORDER_WIDTH, borderwidth=0)
+        self._text_open = False
+        self._note_node_id: str | None = None  # the node whose note the text area shows
+        self._held_scroll: Point | None = None  # the map point kept at the canvas's top-left while the window resizes
+        self._release_scroll_job: str | None = None
+        self._canvas.bind("<Configure>", lambda _event: self._reapply_held_scroll(), add="+")
         self._update_view_toolbar()
         self._theme = theme
         self.apply_theme(theme)
@@ -65,9 +87,11 @@ class MappingView(View):
     def show_map(self, mind_map: MindMap) -> None:
         """Shows the map with its root selected, centred on the root."""
         self._title_editor.cancel()  # the node being edited belongs to the old map
+        self._note_node_id = None  # and so does the note being edited
         self._mind_map = mind_map
         self._show_toolbars()
         self._selection.select(mind_map.root.node_id)
+        self._show_selected_note()
         self._redraw()
         self.after_idle(lambda: self._canvas.center_on(mind_map.root.position))
 
@@ -83,8 +107,10 @@ class MappingView(View):
     # --- editing ------------------------------------------------------------
 
     def finish_editing(self) -> None:
-        """Closes the title editor if it is open, saving what was typed into the map. Call it before saving the map."""
+        """Closes the title editor if it is open and stores the note being edited, saving what was typed into the
+        map. Call it before saving the map."""
         self._title_editor.finish()
+        self._store_note()
 
     def on_hide(self) -> None:
         self.finish_editing()
@@ -98,6 +124,7 @@ class MappingView(View):
         anchor = self._canvas.window_point_of(selected.position)
         child = self._editor.add_child(self._mind_map, selected.node_id)
         self._selection.select(child.node_id)
+        self._show_selected_note()
         self._redraw_keeping_in_place(selected, anchor)
         self.edit_selected_title(select_all=True)
 
@@ -119,6 +146,7 @@ class MappingView(View):
         anchor = self._canvas.window_point_of(parent.position)
         self._editor.delete_node(self._mind_map, selected.node_id)
         self._selection.select(parent.node_id)
+        self._show_selected_note()
         self._redraw_keeping_in_place(parent, anchor)
 
     def set_selected_color(self, color: NodeColor) -> None:
@@ -169,6 +197,40 @@ class MappingView(View):
     def drag_enabled(self) -> bool:
         return self._canvas.drag_enabled
 
+    # --- text area ----------------------------------------------------------
+
+    def toggle_text(self) -> None:
+        """Opens or closes the text area beside the map."""
+        self.set_text_open(not self._text_open)
+
+    def set_text_open(self, is_open: bool) -> None:
+        """Opens the selected node's note to the right of the map, ready for typing, or stores the note and closes
+        it. The window widens or narrows on its right by the text area's width, so nothing else moves."""
+        if is_open == self._text_open:
+            return
+        self.finish_editing()
+        self.update_idletasks()  # current widths, for resizing the window
+        self._text_open = is_open
+        if is_open:
+            text_width = round(self._canvas.winfo_width() * TEXT_TO_MAP_WIDTH)
+            self._text_editor.configure(width=text_width)
+            self._text_border.grid(row=0, column=TEXT_BORDER_COLUMN, rowspan=2, sticky="ns")
+            self._text_editor.grid(row=0, column=TEXT_COLUMN, rowspan=2, sticky="nsew")
+            self._widen_window(text_width + TEXT_BORDER_WIDTH)
+            self._note_node_id = None
+            self._show_selected_note(focus=True)
+        else:
+            text_width = self._text_editor.winfo_width() + self._text_border.winfo_width()
+            self._text_border.grid_remove()
+            self._text_editor.grid_remove()
+            self._widen_window(-text_width)
+            self._note_node_id = None
+        self._update_view_toolbar()
+
+    @property
+    def text_open(self) -> bool:
+        return self._text_open
+
     def apply_theme(self, theme: Theme) -> None:
         self.finish_editing()
         self._theme = theme
@@ -176,6 +238,8 @@ class MappingView(View):
         self._toolbar.apply_theme(theme)
         self._style_toolbar.apply_theme(theme)
         self._view_toolbar.apply_theme(theme)
+        self._text_editor.apply_theme(theme)
+        self._text_border.configure(background=theme.palette.connector_line)
         self._redraw()  # fonts may change, so node sizes and layout change too
 
     # --- internals ----------------------------------------------------------
@@ -187,6 +251,7 @@ class MappingView(View):
         if self._mind_map is None or node_id == self._selection.selected_id:
             return
         self._selection.select(node_id)
+        self._show_selected_note()
         self._canvas.draw_map(self._mind_map, node_id)  # selection doesn't change sizes, so no new layout
         self._update_toolbar()
 
@@ -206,6 +271,49 @@ class MappingView(View):
         anchor = self._canvas.window_point_of(node.position)
         if self._editor.set_title(self._mind_map, node_id, title):
             self._redraw_keeping_in_place(node, anchor)
+
+    def _widen_window(self, extra: int) -> None:
+        """Makes the window `extra` pixels wider (narrower if negative) on its right, keeping its position and
+        height, so everything already in it stays put. It doesn't grow past the screen's right edge; if it can't
+        grow enough, the map gives up the rest.
+
+        The map's scroll is held for a moment: closing the text area makes the canvas briefly wider than the map's
+        scroll region (until the window manager narrows the window), and Tk would then snap the view to the
+        region's edge. The scroll is re-applied each time the canvas resizes until then.
+        """
+        self._held_scroll = self._canvas.map_point_at(0, 0)
+        window = self.winfo_toplevel()
+        width = window.winfo_width() + extra
+        if extra > 0:
+            width = min(width, window.winfo_screenwidth() - window.winfo_rootx())
+        window.geometry(f"{max(width, 1)}x{window.winfo_height()}")
+        if self._release_scroll_job is not None:
+            self.after_cancel(self._release_scroll_job)
+        self._release_scroll_job = self.after(KEEP_MAP_STILL_MS, self._release_held_scroll)
+
+    def _reapply_held_scroll(self) -> None:
+        if self._held_scroll is not None:
+            self._canvas.scroll_point_to(self._held_scroll, 0, 0)
+
+    def _release_held_scroll(self) -> None:
+        self._held_scroll = None
+        self._release_scroll_job = None
+
+    def _show_selected_note(self, focus: bool = False) -> None:
+        """Shows the selected node's note in the text area, if it is open and the node isn't already shown.
+        With nothing selected, the last note stays. Store the shown note first (finish_editing())."""
+        selected = self._selected_node()
+        if not self._text_open or selected is None or selected.node_id == self._note_node_id:
+            return
+        self._note_node_id = selected.node_id
+        self._text_editor.show_note(selected.note, focus=focus)
+
+    def _store_note(self) -> None:
+        """Stores the text area's note in the node it belongs to, if the area is open and the node still exists."""
+        if not self._text_open or self._note_node_id is None or self._mind_map is None:
+            return
+        if self._mind_map.find_node(self._note_node_id) is not None:
+            self._editor.set_note(self._mind_map, self._note_node_id, self._text_editor.note())
 
     def _selected_node(self) -> Node | None:
         if self._mind_map is None:
@@ -235,6 +343,7 @@ class MappingView(View):
         canvas = self._canvas
         self._view_toolbar.show_zoom(canvas.zoom, can_zoom_out=canvas.can_zoom_out, can_zoom_in=canvas.can_zoom_in)
         self._view_toolbar.show_drag(canvas.drag_enabled)
+        self._view_toolbar.show_text(self._text_open)
 
     def _update_toolbar(self) -> None:
         selected = self._selected_node()
@@ -251,9 +360,9 @@ class MappingView(View):
         vertical = ttk.Scrollbar(self, orient="vertical", command=canvas.yview)
         horizontal = ttk.Scrollbar(self, orient="horizontal", command=canvas.xview)
         canvas.configure(yscrollcommand=vertical.set, xscrollcommand=horizontal.set)
-        canvas.grid(row=0, column=0, sticky="nsew")
+        canvas.grid(row=0, column=CANVAS_COLUMN, sticky="nsew")
         vertical.grid(row=0, column=1, sticky="ns")
-        horizontal.grid(row=1, column=0, sticky="ew")
+        horizontal.grid(row=1, column=CANVAS_COLUMN, sticky="ew")
         self.rowconfigure(0, weight=1)
-        self.columnconfigure(0, weight=1)
+        self.columnconfigure(CANVAS_COLUMN, weight=1)  # the map takes any change in the window's width
         return canvas

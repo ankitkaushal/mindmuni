@@ -13,7 +13,7 @@ The editor is three classes in `mindmuni/ui/text_editor/`, layered so that
 only one of them knows how formatting is stored inside Tk:
 
 ```
-caller (preview script, later the app)
+caller (MappingView, or the preview script)
    │  show_note(note) · note() · apply_theme(theme)
    ▼
 TextEditorView ─────────────── owns ───────────────┐
@@ -53,11 +53,14 @@ Node.note ──show_note()──► RichTextAdapter.load() ──► tk.Text co
 new NoteDocument ◄──note()── RichTextAdapter.dump() ◄── tk.Text content + tags
 ```
 
-- `show_note(note)` loads the note, puts the cursor at `1.0`, clears the undo
-  history and modified flag, focuses the text and refreshes the toolbar.
+- `show_note(note, focus=True)` loads the note, puts the cursor at `1.0`,
+  clears the undo history and modified flag, refreshes the toolbar and, unless
+  `focus` is false, focuses the text. `MappingView` passes `focus=False` when
+  the selection changes, so clicking a node doesn't pull the keyboard away from
+  the map.
 - `note()` builds a fresh `NoteDocument` from what is on screen. Writing it back
-  to the node is the caller's job (today only `text_editor_preview.py` does,
-  on F6).
+  to the node is the caller's job: `MappingView` does it through
+  `MapEditor.set_note()` (see §9), and `text_editor_preview.py` on F6.
 
 The `tk.Text` itself is the editing state while a note is open; there is no
 parallel model kept in sync on every keystroke.
@@ -234,19 +237,71 @@ can't be undone into another.
 
 ---
 
-## 9. Integration status and extension points
+## 9. In the app: the split screen
 
-The editor isn't wired into the app yet: `mindmuni/app.py` registers a
-placeholder view under `"text_editor"`. It's exercised through
-`text_editor_preview.py`, which stands in for the future caller (load a node,
-show its note, read it back with `note()` when moving on).
+The editor opens in a split screen inside `MappingView`, not as a separate
+screen swapped in by `ViewNavigator`, so it has no Back button. The view
+toolbar's **Text** button (beside **Drag**) calls `MappingView.toggle_text()`.
+
+```
+MappingView (grid)
+  column 0 (weight 1)                    column 1     column 2      column 3 (weight 0, fixed width)
+  ┌──────────────────────────────────┐  ┌───┐        ┌─┐           ┌─────────────────────────┐
+  │ MapCanvas + pinned toolbars      │  │ ▲ │        │ │ 1px       │ TextEditorView           │
+  │                                  │  │ █ │        │ │ border    │                          │
+  ├──────────────────────────────────┤  └───┘        └─┘           │                          │
+  │ horizontal scrollbar             │                              │                          │
+  └──────────────────────────────────┘                              └─────────────────────────┘
+```
+
+- **Nothing already on screen moves.** Opening the area must not shrink or move
+  the map or anything else. `set_text_open(True)` measures the canvas and sets
+  the editor's width to a third of it (`TEXT_TO_MAP_WIDTH`). The editor has
+  `grid_propagate(False)`, so that width is used whatever its contents ask for.
+  Then `_widen_window()` makes the toplevel window wider on its right by that
+  width plus the 1px border, keeping its position. The map keeps its exact width
+  and the text area fills the new space. The title-bar text, centred by the
+  window manager, moves with the window's middle, and that's accepted. The
+  window doesn't grow past the screen's right edge; if it can't grow enough,
+  the map gives up the rest.
+- **Resizing while open:** the text area keeps its width and the map's column
+  (weight 1) takes any change.
+- **Closing:** hides the border and editor with `grid_remove()` and narrows the
+  window on its right by their width, so everything is back where it was.
+- **Holding the map's scroll:** when the text column is removed, the canvas is
+  briefly as wide as the old, wider window (until the window manager narrows
+  it). That's wider than the map's scroll region, which makes Tk snap the view
+  to the region's edge. So `_widen_window()` notes the map point at the canvas's
+  top-left (`MapCanvas.map_point_at(0, 0)`) and, for `KEEP_MAP_STILL_MS`
+  (500 ms), scrolls it back there (`scroll_point_to()`) on every canvas
+  `<Configure>`.
+- **Which note:** `MappingView` remembers the node whose note is shown
+  (`_note_node_id`). `_show_selected_note()` runs after every selection change
+  (`show_map`, a node click, `insert_node`, `delete_selected_node`) and loads
+  the selected node's note. Clicking empty space selects nothing and keeps the
+  last note, so typing never goes nowhere. `show_map()` forgets the node first,
+  so an old map's note is never written into a new map.
+- **Storing the note:** `finish_editing()`, which every map action already calls
+  first, now also stores the shown note into its node with
+  `MapEditor.set_note()` (it touches the map only when the note changed). The app
+  calls `finish_editing()` before writing the file, so **Save** includes the text
+  being typed. Closing the text area stores it too.
+- **Keys:** the app binds only `Ctrl` shortcuts and `Esc` globally, which don't
+  clash with typing. `map_preview.py` binds plain keys (`T`, `L`, `R`, `Insert`,
+  `Delete`, `F2`) on its window, so it ignores them when they come from the text
+  area.
+
+`text_editor_preview.py` still runs the editor on its own.
+
+---
+
+## 10. Extension points
 
 Planned work and where it fits:
 
 | Feature | Where |
 |---------|-------|
 | `Ctrl+B` / `Ctrl+H` with no selection (format the next typed text) | A pending-format set in the view, applied to inserted text in `_on_modified()` and cleared when the cursor moves |
-| Back button | Toolbar callback that asks the navigator to return to the map |
-| App wiring | Register `TextEditorView` instead of the placeholder; in `on_show(context)` call `show_note()` with the node's note, and in `on_hide()` write `note()` back to the node |
+| A draggable divider | Put the map and the text area in a `ttk.PanedWindow` instead of two grid columns |
 | New inline formats | Add to `InlineFormat` and `TextSpan`, configure the tag in `apply_theme()`, read it in `_dump_line()` / write it in `load()`, add to `INLINE_BUTTONS` |
 | New block types | Add to `BlockType`, add the tag to `HEADING_TAGS` (or a renamed equivalent) with its font, add a toolbar button |

@@ -1,6 +1,7 @@
 from mindmuni.model.mind_map import MindMap
 from mindmuni.model.node import Node
 from mindmuni.model.node_style import NodeColor, NodeShape
+from mindmuni.model.note_document import NoteDocument
 
 NEW_NODE_TITLE = "New node"
 
@@ -58,6 +59,15 @@ class MapEditor:
         if node.style.shape is shape:
             return False
         node.style.shape = shape
+        mind_map.touch()
+        return True
+
+    def set_note(self, mind_map: MindMap, node_id: str, note: NoteDocument) -> bool:
+        """Sets the node's note. Returns whether anything changed."""
+        node = self._require_node(mind_map, node_id)
+        if node.note == note:
+            return False
+        node.note = note
         mind_map.touch()
         return True
 

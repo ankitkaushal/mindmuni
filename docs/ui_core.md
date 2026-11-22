@@ -39,7 +39,7 @@ sudo apt install python3-tk      # Ubuntu/Debian only; Windows/macOS python.org 
 | `status_bar.py` | `StatusBar` is a one-line message area: `show_message(text)` and `clear()`. |
 | `dialogs.py` | `Dialogs` wraps Tk's standard dialogs so other code never calls `filedialog` or `messagebox` directly: `ask_map_to_open()`, `ask_map_save_path(name)`, `ask_theme_to_open()`, `confirm_discard_changes()` (Yes/No/Cancel → `True`/`False`/`None`) and `show_error()`. |
 | `toolbar_button.py` | `create_toolbar_button(parent, text, command)` makes a flat `tk.Button` and `style_toolbar_button(button, theme)` colours it from the theme. Shared by the mapping view's toolbars and, next, the text editor's. |
-| `placeholder_view.py` | `PlaceholderView` and `PlaceholderAction` are a temporary screen with a title, description and buttons. They stand in for the mapping view and the text editor until those exist. |
+| `placeholder_view.py` | `PlaceholderView` and `PlaceholderAction` are a temporary screen with a title, description and buttons, for views that don't exist yet. None is registered at the moment. |
 | `__init__.py` | Re-exports the public UI shell classes (`from mindmuni.ui.core import MainWindow, ...`). |
 
 ### `mindmuni/core/`: logic, no Tkinter
@@ -70,8 +70,8 @@ main.py
         └── MainWindow (tk.Tk)                                             │
               ├── MenuBar ── FileCommands / ThemeCommands ──► app handlers │
               ├── view_container ◄── ViewNavigator ── VIEW_CHANGED ────────┘
-              │                        ├── "map"          (PlaceholderView)
-              │                        └── "text_editor"  (PlaceholderView)
+              │                        └── "map"          (MappingView, with the
+              │                                            TextEditorView beside it)
               └── StatusBar
 ```
 
@@ -128,4 +128,3 @@ navigator.back() / Esc               → previous view restored with its origina
 | Theme → Custom… | Reports the chosen file only | `ThemeRepository.load_custom()` |
 | Quit | Closes without asking about unsaved changes | A dirty check plus `Dialogs.confirm_discard_changes()` |
 | Built-in themes | Defined in Python | `themes/dark.json` and `themes/light.json` |
-| `"text_editor"` view | `PlaceholderView` | `TextEditorView` |
