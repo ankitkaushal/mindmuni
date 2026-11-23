@@ -14,7 +14,7 @@ Context for testing recent fixes on Windows. They were made and tested on Linux 
 
 **Known gap, not fixed:** AltGr on European layouts reports as Ctrl+Alt, so typing `@` or `€` with AltGr still ends editing. A possible fix is to type `event.char` whenever it is a printable character, even with Ctrl+Alt held.
 
-## 2. Text area resizing on a second monitor (not committed yet)
+## 2. Text area resizing on a second monitor (committed: a234a78)
 
 **Symptom:** on the second monitor (to the right of the main one, same size), pressing the view toolbar's Text button shrank the window instead of widening it. Closing Text then made it narrower still.
 
@@ -35,7 +35,7 @@ Context for testing recent fixes on Windows. They were made and tested on Linux 
 
 If `monitor_right_edge` returns a wrong value, put a temporary print of it next to `winfo_rootx()` and `winfo_width()` in `_widen_window`. If the displays use different scaling percentages, Tk's coordinates and the Win32 ones may not agree, because the app doesn't declare DPI awareness. A mismatch there is the first thing to suspect.
 
-## 3. Restore after maximize doesn't return to the starting size (not committed yet)
+## 3. Restore after maximize doesn't return to the starting size (committed: a234a78)
 
 **Symptom:** after maximizing and then restoring, the window didn't come back to its size from before maximizing.
 
