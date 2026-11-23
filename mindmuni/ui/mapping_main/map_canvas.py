@@ -8,7 +8,7 @@ from mindmuni.model.mind_map import MindMap
 from mindmuni.model.node import Node
 from mindmuni.model.theme import Theme
 from mindmuni.ui.mapping_main.connector_renderer import ConnectorRenderer
-from mindmuni.ui.mapping_main.node_renderer import NodeRenderer, node_id_from_tags
+from mindmuni.ui.mapping_main.node_renderer import NodeRenderer, node_id_from_tags, node_tag
 
 SCROLL_MARGIN = 120
 WHEEL_SCROLL_UNITS = 3
@@ -18,10 +18,17 @@ MAX_ZOOM = 3.0
 ZOOM_STEP = 1.2  # each zoom in multiplies the zoom by this, each zoom out divides by it
 CONTROL_MASK = 0x0004
 SHIFT_MASK = 0x0001
-CLICK_TOLERANCE = 3  # a press and release closer than this (in pixels) is a click, not a pan
+CLICK_TOLERANCE = 3  # a press and release closer than this (in pixels) is a click, not a pan or a node drag
+DROP_TARGET_TAG = "drop_target"
+DROP_OUTLINE_WIDTH = 3
+DROP_OUTLINE_PADDING = 4
+DROP_OUTLINE_DASH = (6, 4)
+NODE_DRAG_CURSOR = "fleur"
 
 NodeClickHandler = Callable[[str | None], None]
 NodeDoubleClickHandler = Callable[[str], None]
+NodeDropHandler = Callable[[str, str | None], None]  # (dragged node_id, new parent node_id or None)
+NodeDropCheck = Callable[[str, str], bool]  # (dragged node_id, target node_id) -> can it be dropped there
 
 
 def iter_visible_nodes(root: Node) -> Iterator[Node]:
@@ -39,7 +46,9 @@ class MapCanvas(tk.Canvas):
     Zooming only redraws, it never re-runs the layout or changes Node.position.
 
     Left-click on a node reports its id to the click handler, and a double-click on a node reports it to the
-    double-click handler. A left-click on empty space without dragging reports None. Dragging the map around
+    double-click handler. A left-click on empty space without dragging reports None. Left-dragging a node other
+    than the root moves its drawing with the pointer and outlines the node under the pointer when the drop check
+    allows dropping there; on release the drop handler gets that node, or None to put it back. Dragging the map around
     (left-drag on empty space, or middle-drag anywhere) is off until set_drag_enabled(True); the scrollbars and
     the mouse wheel always work.
     """
@@ -55,6 +64,12 @@ class MapCanvas(tk.Canvas):
         self._on_before_zoom: Callable[[], None] = lambda: None
         self._on_zoom_changed: Callable[[], None] = lambda: None
         self._press_point: tuple[int, int] | None = None  # where an empty-space left press started
+        self._on_node_drop: NodeDropHandler = lambda _node_id, _target_id: None
+        self._can_drop: NodeDropCheck = lambda _node_id, _target_id: False
+        self._node_press: tuple[str, int, int] | None = None  # the node a left press started on, and where
+        self._dragged_id: str | None = None  # the node being dragged, once the pointer has moved far enough
+        self._drag_point: tuple[int, int] = (0, 0)  # the pointer's last window point while dragging a node
+        self._drop_target_id: str | None = None
         self._drag_enabled = False
         self._node_renderer: NodeRenderer | None = None
         self._connector_renderer: ConnectorRenderer | None = None
@@ -97,6 +112,13 @@ class MapCanvas(tk.Canvas):
     def on_node_double_click(self, handler: NodeDoubleClickHandler) -> None:
         """handler(node_id) on a double-click on a node. The first click of the pair is reported as a click."""
         self._on_node_double_click = handler
+
+    def on_node_drop(self, handler: NodeDropHandler, can_drop: NodeDropCheck) -> None:
+        """handler(node_id, target_id) when a dragged node is released: target_id is the node it was dropped on,
+        or None when it wasn't dropped on a node that can_drop(node_id, target_id) allows. The node is still drawn
+        where it was dropped, so the handler must redraw the map either way."""
+        self._on_node_drop = handler
+        self._can_drop = can_drop
 
     def on_before_zoom(self, handler: Callable[[], None]) -> None:
         """handler() runs before every zoom change, while the map is still drawn at the old zoom."""
@@ -215,6 +237,7 @@ class MapCanvas(tk.Canvas):
         node_id = self._node_id_at(event.x, event.y)
         if node_id is not None:
             self._press_point = None
+            self._node_press = (node_id, event.x, event.y)
             self._on_node_click(node_id)
             return
         self._press_point = (event.x, event.y)  # still needed when dragging is locked, to detect a click
@@ -226,6 +249,9 @@ class MapCanvas(tk.Canvas):
             self._on_node_double_click(node_id)
 
     def _on_left_drag(self, event: tk.Event) -> None:
+        if self._node_press is not None:
+            self._drag_node(event.x, event.y)
+            return
         if self._press_point is not None and self._drag_enabled:
             self.scan_dragto(event.x, event.y, gain=1)
 
@@ -237,6 +263,9 @@ class MapCanvas(tk.Canvas):
             self.scan_dragto(event.x, event.y, gain=1)
 
     def _on_left_release(self, event: tk.Event) -> None:
+        if self._node_press is not None:
+            self._drop_node()
+            return
         if self._press_point is None:
             return
         start_x, start_y = self._press_point
@@ -244,14 +273,59 @@ class MapCanvas(tk.Canvas):
         if abs(event.x - start_x) <= CLICK_TOLERANCE and abs(event.y - start_y) <= CLICK_TOLERANCE:
             self._on_node_click(None)
 
-    def _node_id_at(self, window_x: int, window_y: int) -> str | None:
-        """The node drawn at the window point, if any (the topmost item there that belongs to a node)."""
+    def _node_id_at(self, window_x: int, window_y: int, ignore: str | None = None) -> str | None:
+        """The node drawn at the window point, if any (the topmost item there that belongs to a node other than
+        `ignore`)."""
         x, y = self.canvasx(window_x), self.canvasy(window_y)
         for item in reversed(self.find_overlapping(x, y, x, y)):
             node_id = node_id_from_tags(self.gettags(item))
-            if node_id is not None:
+            if node_id is not None and node_id != ignore:
                 return node_id
         return None
+
+    # --- dragging a node ----------------------------------------------------
+
+    def _drag_node(self, window_x: int, window_y: int) -> None:
+        """Starts dragging the pressed node once the pointer has moved past CLICK_TOLERANCE, then moves its
+        drawing with the pointer and outlines the node it would be dropped on."""
+        node_id, start_x, start_y = self._node_press
+        if self._dragged_id is None:
+            far_enough = abs(window_x - start_x) > CLICK_TOLERANCE or abs(window_y - start_y) > CLICK_TOLERANCE
+            if not far_enough or self._mind_map is None or node_id == self._mind_map.root.node_id:
+                return
+            self._dragged_id, self._drag_point = node_id, (start_x, start_y)
+            self.tag_raise(node_tag(node_id))
+            self.configure(cursor=NODE_DRAG_CURSOR)
+        last_x, last_y = self._drag_point
+        self.move(node_tag(node_id), window_x - last_x, window_y - last_y)
+        self._drag_point = (window_x, window_y)
+        target_id = self._node_id_at(window_x, window_y, ignore=node_id)
+        self._show_drop_target(target_id if target_id is not None and self._can_drop(node_id, target_id) else None)
+
+    def _show_drop_target(self, target_id: str | None) -> None:
+        if target_id == self._drop_target_id:
+            return
+        self._drop_target_id = target_id
+        self.delete(DROP_TARGET_TAG)
+        box = self.bbox(node_tag(target_id)) if target_id is not None else None
+        if box is None or self._theme is None:
+            return
+        left, top, right, bottom = box
+        pad = DROP_OUTLINE_PADDING
+        self.create_rectangle(
+            left - pad, top - pad, right + pad, bottom + pad, outline=self._theme.palette.selection_outline,
+            width=DROP_OUTLINE_WIDTH, dash=DROP_OUTLINE_DASH, tags=DROP_TARGET_TAG,
+        )
+
+    def _drop_node(self) -> None:
+        """Ends a press on a node. If it was being dragged, reports where it was dropped."""
+        dragged_id, target_id = self._dragged_id, self._drop_target_id
+        self._node_press = self._dragged_id = self._drop_target_id = None
+        if dragged_id is None:
+            return  # just a click
+        self.delete(DROP_TARGET_TAG)
+        self.configure(cursor="")
+        self._on_node_drop(dragged_id, target_id)
 
     def _bind_mouse_wheel(self) -> None:
         if sys.platform.startswith("linux"):

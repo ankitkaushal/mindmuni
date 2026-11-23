@@ -54,6 +54,10 @@ class MappingView(View):
         self._canvas = self._create_scrollable_canvas()
         self._canvas.on_node_click(self._on_node_click)
         self._canvas.on_node_double_click(self._on_node_double_click)
+        self._canvas.on_node_drop(
+            self._on_node_dropped,
+            can_drop=lambda node_id, target_id: self._editor.can_move(self._mind_map, node_id, target_id),
+        )
         self._canvas.on_before_zoom(self.finish_editing)
         self._canvas.on_zoom_changed(self._on_zoom_changed)
         self._layout = TreeLayout(self._canvas.measure_node)
@@ -284,6 +288,20 @@ class MappingView(View):
             self._on_node_click(node_id)
         self.edit_selected_title()
 
+
+    def _on_node_dropped(self, node_id: str, target_id: str | None) -> None:
+        """Moves a dragged node under the node it was dropped on, keeping that node where it is on screen. Dropped
+        anywhere else, the node just goes back to its place."""
+        self.finish_editing()
+        if self._mind_map is None:
+            return
+        target = self._mind_map.find_node(target_id) if target_id is not None else None
+        if target is None:
+            self._canvas.draw_map(self._mind_map, self._selection.selected_id)
+            return
+        anchor = self._canvas.window_point_of(target.position)
+        self._editor.move_node(self._mind_map, node_id, target.node_id)
+        self._redraw_keeping_in_place(target, anchor)
 
     def _rename_node(self, node_id: str, title: str) -> None:
         """Saves an edited title. The node's size can change, so the layout runs again with the node kept in place."""

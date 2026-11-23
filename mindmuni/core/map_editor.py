@@ -71,6 +71,38 @@ class MapEditor:
         mind_map.touch()
         return True
 
+    def move_node(self, mind_map: MindMap, node_id: str, new_parent_id: str) -> bool:
+        """Moves the node, with its subtree, to the end of the new parent's children. A collapsed new parent is
+        expanded so the node shows. Refused (ValueError) when can_move() says no. Returns whether anything changed:
+        dropping a node on its own parent while it's already the last child changes nothing."""
+        if not self.can_move(mind_map, node_id, new_parent_id):
+            raise ValueError(f"Node {node_id!r} can't be moved under {new_parent_id!r}")
+        node = self._require_node(mind_map, node_id)
+        old_parent = mind_map.parent_of(node_id)
+        new_parent = self._require_node(mind_map, new_parent_id)
+        if old_parent is new_parent and new_parent.children[-1] is node:
+            return False
+        old_parent.remove_child(node_id)
+        new_parent.collapsed = False
+        new_parent.add_child(node)
+        mind_map.touch()
+        return True
+
+    @staticmethod
+    def can_move(mind_map: MindMap, node_id: str, new_parent_id: str) -> bool:
+        """Whether the node can be moved under the new parent: not the root, and not onto itself or anything in
+        its own subtree."""
+        node = mind_map.find_node(node_id)
+        if node is None or node is mind_map.root or mind_map.find_node(new_parent_id) is None:
+            return False
+        pending = [node]
+        while pending:
+            current = pending.pop()
+            if current.node_id == new_parent_id:
+                return False
+            pending.extend(current.children)
+        return True
+
     @staticmethod
     def can_delete(mind_map: MindMap, node_id: str) -> bool:
         return node_id != mind_map.root.node_id

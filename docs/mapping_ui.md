@@ -51,6 +51,7 @@ To preview a different map, put it in `maps/` and change this line.
 | `Delete` or the **✕ Delete** button | Delete the selected node and its subtree, then select its parent. Disabled for the root. |
 | Click a colour swatch (style toolbar) | Set the selected node's colour. The current colour is ringed and its name (e.g. "Red") is shown in the name box. |
 | Click a shape icon (style toolbar) | Set the selected node's shape. The current shape is ringed and its name is shown in the name box. The node is kept in place while the layout adjusts to its new size. |
+| Left-drag a node onto another node | Move it, with its subtree, to be the other node's last child (a collapsed node is expanded). While dragging, the node follows the pointer and a valid drop target gets a dashed outline. Dropping it on empty space, on itself or on one of its own descendants puts it back. The root can't be dragged. The node it was dropped on stays where it was on screen while the layout adjusts. Works whether **Drag** is on or off. |
 | Left-drag on empty space, or middle-drag | Pan the canvas, only while **Drag: On** is set in the view toolbar. Dragging is locked by default; the scrollbars and mouse wheel always work. |
 | Mouse wheel | Scroll up and down |
 | Shift + wheel | Scroll sideways |
