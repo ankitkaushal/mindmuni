@@ -16,6 +16,7 @@ from mindmuni.ui.mapping_main.style_toolbar import StyleToolbar
 from mindmuni.ui.mapping_main.title_editor import TitleEditor
 from mindmuni.ui.mapping_main.view_toolbar import ViewToolbar
 from mindmuni.ui.text_editor.text_editor_view import TextEditorView
+from mindmuni.utils.screen_utils import is_maximized, monitor_right_edge
 
 MAP_VIEW_ID = "map"
 TEXT_TO_MAP_WIDTH = 1 / 3  # the text area opens a third as wide as the map
@@ -76,6 +77,10 @@ class MappingView(View):
         self._text_border = tk.Frame(self, width=TEXT_BORDER_WIDTH, borderwidth=0)
         self._text_open = False
         self._note_node_id: str | None = None  # the node whose note the text area shows
+        self._window_grown_by = 0  # how much wider the window got when the text area opened
+        self._shrink_on_restore = 0  # growth left to undo once a maximized window is restored
+        self._text_opened_maximized = False  # the text area's width was set while maximized, so is refit on restore
+        self._was_maximized = False
         self._resize_target: int | None = None  # this view's width once the window has resized, while waiting
         self._unpin_job: str | None = None
         self.bind("<Configure>", self._on_resized, add="+")
@@ -223,14 +228,24 @@ class MappingView(View):
             self._text_editor.configure(width=text_width)
             self._text_border.grid(row=0, column=TEXT_BORDER_COLUMN, rowspan=2, sticky="ns")
             self._text_editor.grid(row=0, column=TEXT_COLUMN, rowspan=2, sticky="nsew")
-            self._widen_window(text_width + TEXT_BORDER_WIDTH)
+            self._text_opened_maximized = is_maximized(self)
+            if self._shrink_on_restore:  # closed and reopened while maximized: the restored size still has room
+                self._window_grown_by, self._shrink_on_restore = self._shrink_on_restore, 0
+                self._unpin_map_width()
+            else:
+                self._window_grown_by = self._widen_window(text_width + TEXT_BORDER_WIDTH)
             self._note_node_id = None
             self._show_selected_note(focus=True)
         else:
-            text_width = self._text_editor.winfo_width() + self._text_border.winfo_width()
             self._text_border.grid_remove()
             self._text_editor.grid_remove()
-            self._widen_window(-text_width)
+            if is_maximized(self) and self._window_grown_by:  # shrink the restored size once it is restored
+                self._shrink_on_restore = self._window_grown_by
+                self._unpin_map_width()
+            else:
+                self._widen_window(-self._window_grown_by)  # only what opening added, so the window is as it was
+            self._window_grown_by = 0
+            self._text_opened_maximized = False
             self._note_node_id = None
         self._update_view_toolbar()
 
@@ -279,26 +294,36 @@ class MappingView(View):
         if self._editor.set_title(self._mind_map, node_id, title):
             self._redraw_keeping_in_place(node, anchor)
 
-    def _widen_window(self, extra: int) -> None:
+    def _widen_window(self, extra: int) -> int:
         """Makes the window `extra` pixels wider (narrower if negative) on its right, keeping its position and
-        height, so everything already in it stays put. It doesn't grow past the screen's right edge; if it can't
-        grow enough, the map gives up the rest once its width is unpinned."""
-        window = self.winfo_toplevel()
-        width = window.winfo_width() + extra
-        if extra > 0:
-            width = min(width, window.winfo_screenwidth() - window.winfo_rootx())
-        width = max(width, 1)
-        self._resize_target = self.winfo_width() + width - window.winfo_width()
-        window.geometry(f"{width}x{window.winfo_height()}")
+        height, so everything already in it stays put, and returns how much its width was asked to change.
 
-    def _pin_map_width(self) -> None:
-        """Holds the map's column at its current width until the window has resized (see _on_resized()).
+        It doesn't grow past the right edge of the monitor it is on, and never shrinks when asked to grow; if it
+        can't grow enough, the map gives up the rest once its width is unpinned. A maximized window is left alone,
+        because on Windows setting its size changes the size it is restored to."""
+        window = self.winfo_toplevel()
+        current = window.winfo_width()
+        width = current if is_maximized(window) else current + extra
+        if extra > 0:
+            room = monitor_right_edge(window) - window.winfo_rootx()
+            width = max(min(width, room), current)
+        width = max(width, 1)
+        if width == current:  # no resize is coming, so let the map take or give up the space now
+            self._unpin_map_width()
+            return 0
+        self._resize_target = self.winfo_width() + width - current
+        window.geometry(f"{width}x{window.winfo_height()}")
+        return width - current
+
+    def _pin_map_width(self, width: int | None = None) -> None:
+        """Holds the map's column at `width` (default: its current width) until the window has resized (see
+        _on_resized()).
 
         The window manager resizes the window a moment after it's asked to. Meanwhile the text area is laid out
         past the window's right edge, out of sight, instead of taking the map's space (which flashed white), and
         on closing the map doesn't stretch into the space the text area leaves.
         """
-        self.columnconfigure(CANVAS_COLUMN, weight=0, minsize=self._canvas.winfo_width())
+        self.columnconfigure(CANVAS_COLUMN, weight=0, minsize=width or self._canvas.winfo_width())
         if self._unpin_job is not None:
             self.after_cancel(self._unpin_job)
         self._unpin_job = self.after(RESIZE_TIMEOUT_MS, self._unpin_map_width)
@@ -314,6 +339,34 @@ class MappingView(View):
     def _on_resized(self, event: tk.Event) -> None:
         if self._resize_target is not None and event.width == self._resize_target:
             self._unpin_map_width()
+        maximized = is_maximized(self)
+        if self._was_maximized and not maximized:
+            self.after_idle(self._on_restored)
+        self._was_maximized = maximized
+
+    def _on_restored(self) -> None:
+        """Undoes or finishes, once the window is restored from maximized, what Text did while it was maximized.
+
+        Closed while maximized: the window gives back the width that opening added. Opened while maximized: the
+        text area was sized for the maximized map, so it is refit to the restored window. If the restored size
+        already has room for it (it was open before maximizing), it takes that room; otherwise it becomes a third
+        of the map and the window widens by that much, as when opening Text normally.
+        """
+        if self._shrink_on_restore:
+            shrink, self._shrink_on_restore = self._shrink_on_restore, 0
+            self._widen_window(-shrink)
+        if not (self._text_open and self._text_opened_maximized) or is_maximized(self):
+            return
+        self._text_opened_maximized = False
+        self.update_idletasks()
+        if self._window_grown_by:
+            self._text_editor.configure(width=self._window_grown_by - TEXT_BORDER_WIDTH)
+            return
+        map_width = self._canvas.winfo_width() + self._text_editor.winfo_width() + TEXT_BORDER_WIDTH
+        text_width = round(map_width * TEXT_TO_MAP_WIDTH)
+        self._pin_map_width(map_width)
+        self._text_editor.configure(width=text_width)
+        self._window_grown_by = self._widen_window(text_width + TEXT_BORDER_WIDTH)
 
     def _show_selected_note(self, focus: bool = False) -> None:
         """Shows the selected node's note in the text area, if it is open and the node isn't already shown.
