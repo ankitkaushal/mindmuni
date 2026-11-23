@@ -4,6 +4,7 @@ from enum import Enum
 
 from mindmuni.model.note_document import BlockType, NoteDocument, TextBlock, TextSpan
 from mindmuni.model.theme import Theme
+from mindmuni.utils.link_finder import find_links
 
 
 class InlineFormat(Enum):
@@ -16,6 +17,7 @@ class InlineFormat(Enum):
 BOLD_TAG = InlineFormat.BOLD.value
 HIGHLIGHT_TAG = InlineFormat.HIGHLIGHTED.value
 HEADING_TAGS = (BlockType.HEADING_1.value, BlockType.HEADING_2.value)  # a line without one is a paragraph
+LINK_TAG = "link"  # on web links found in the text; not saved, they are found again from the text
 
 
 class RichTextAdapter:
@@ -30,12 +32,15 @@ class RichTextAdapter:
 
     Keeping the type on the newline means typing never changes a line's type, an empty line can be a
     heading, and joining two lines (BackSpace at the start of a line) keeps the lower line's type.
+
+    Web links ("https://…", "www.…") carry "link", which mark_links() puts on them again after every edit. It
+    is only for display: the note stores the plain text, and the links are found in it again when it loads.
     """
 
     def __init__(self, text: tk.Text) -> None:
         self._text = text
         # Tags created later win where their options clash, so headings' fonts beat bold's.
-        for tag in (BOLD_TAG, HIGHLIGHT_TAG, BlockType.HEADING_2.value, BlockType.HEADING_1.value):
+        for tag in (BOLD_TAG, HIGHLIGHT_TAG, BlockType.HEADING_2.value, BlockType.HEADING_1.value, LINK_TAG):
             text.tag_configure(tag)
         text.tag_raise("sel")  # selected text stays visible over highlighted text
 
@@ -46,6 +51,7 @@ class RichTextAdapter:
         text.tag_configure(HIGHLIGHT_TAG, background=palette.highlight_background)
         text.tag_configure(BlockType.HEADING_1.value, font=(fonts.family, fonts.heading_1_size, "bold"))
         text.tag_configure(BlockType.HEADING_2.value, font=(fonts.family, fonts.heading_2_size, "bold"))
+        text.tag_configure(LINK_TAG, foreground=palette.link_foreground, underline=True)
 
     def load(self, note: NoteDocument) -> None:
         """Replaces the widget's content with the note. Clears undo history and the modified flag."""
@@ -61,6 +67,7 @@ class RichTextAdapter:
                 text.insert("end-1c", span.text, span_tags)
         for line, block in enumerate(note.blocks, start=1):
             self.set_block_type(line, line, block.block_type)
+        self.mark_links()
         text.mark_set("insert", "1.0")
         text.edit_reset()
         text.edit_modified(False)
@@ -96,6 +103,35 @@ class RichTextAdapter:
             self.set_block_type(line, line, self.block_type_at(f"{line}.0"))
             for inline_format in InlineFormat:
                 self._text.tag_remove(inline_format.value, f"{line}.end")
+
+    def mark_links(self) -> None:
+        """Tags every web link in the text as a link, and nothing else. Run after edits.
+
+        Leaves the tags alone when they already match, since retagging the whole text redraws all of it."""
+        text = self._text
+        wanted = [
+            (f"{line}.{link.start}", f"{line}.{link.end}")
+            for line in range(1, self.line_count() + 1)
+            for link in find_links(text.get(f"{line}.0", f"{line}.end"))
+        ]
+        current = [str(index) for index in text.tag_ranges(LINK_TAG)]
+        if current == [index for pair in wanted for index in pair]:
+            return
+        text.tag_remove(LINK_TAG, "1.0", "end")
+        for start, end in wanted:
+            text.tag_add(LINK_TAG, start, end)
+
+    def link_at(self, index: str) -> str | None:
+        """The URL of the link at the index, or None if there is no link there."""
+        text = self._text
+        if LINK_TAG not in text.tag_names(index):
+            return None
+        start, end = text.tag_prevrange(LINK_TAG, f"{index}+1c")
+        line = int(text.index(start).split(".")[0])
+        column = int(text.index(start).split(".")[1])
+        return next(
+            (link.url for link in find_links(text.get(f"{line}.0", f"{line}.end")) if link.start == column), None
+        )
 
     def has_format(self, inline_format: InlineFormat, start: str, end: str) -> bool:
         """True if every character from start to end (newlines aside) has the format. False for a range with

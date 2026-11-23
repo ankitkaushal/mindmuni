@@ -44,6 +44,7 @@ def dark_theme() -> Theme:
         highlight_background="#665c00",
         menu_background="#2d2d2d",
         menu_foreground="#e0e0e0",
+        link_foreground="#64b5f6",
         node_colors=dict(DARK_NODE_COLORS),
     )
     return Theme(name="dark", palette=palette)
@@ -59,6 +60,7 @@ def light_theme() -> Theme:
         highlight_background="#fff176",
         menu_background="#eeeeee",
         menu_foreground="#212121",
+        link_foreground="#1565c0",
         node_colors=dict(LIGHT_NODE_COLORS),
     )
     return Theme(name="light", palette=palette)

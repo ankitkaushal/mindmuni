@@ -222,7 +222,7 @@ the text so typing continues.
 | Part | Theme values |
 |------|--------------|
 | Text area | `canvas_background`, `foreground` (text and cursor), `selection_outline` (selection), `connector_line` (inactive selection), font `family` / `base_size` |
-| Tags (adapter) | `bold` → base size bold; `highlighted` → `highlight_background`; `HEADING_1` / `HEADING_2` → `heading_1_size` / `heading_2_size` bold |
+| Tags (adapter) | `bold` → base size bold; `highlighted` → `highlight_background`; `HEADING_1` / `HEADING_2` → `heading_1_size` / `heading_2_size` bold; `link` → `link_foreground`, underlined |
 | Toolbar | `menu_background`, toolbar button styling (`connector_line` for disabled text), `highlight_background` for the current type and active formats, `connector_line` for the separator |
 | Border | `connector_line` |
 

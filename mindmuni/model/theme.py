@@ -13,6 +13,7 @@ class ThemePalette:
     highlight_background: str
     menu_background: str
     menu_foreground: str
+    link_foreground: str  # links in notes
     node_colors: dict[NodeColor, str] = field(default_factory=dict)
 
     def color_for(self, node_color: NodeColor) -> str:

@@ -1,4 +1,6 @@
+import sys
 import tkinter as tk
+import webbrowser
 from tkinter import ttk
 
 from mindmuni.model.note_document import BlockType, NoteDocument
@@ -10,6 +12,14 @@ from mindmuni.ui.text_editor.rich_text_adapter import InlineFormat, RichTextAdap
 
 TEXT_EDITOR_VIEW_ID = "text_editor"
 TEXT_PADDING = (24, 16)  # space between the text and the widget's edges
+TEXT_CURSOR = "xterm"
+LINK_CURSOR = "hand2"
+CONTROL_MASK = 0x0004
+COMMAND_MASK = 0x0008  # macOS only; elsewhere this bit is Alt or Num Lock
+# Ctrl+click opens a link; on macOS Cmd+click does too.
+LINK_CLICK_MASK = CONTROL_MASK | (COMMAND_MASK if sys.platform == "darwin" else 0)
+LINK_CLICK_SEQUENCES = ("<Control-Button-1>", "<Command-Button-1>") if sys.platform == "darwin" else ("<Control-Button-1>",)
+LINK_MODIFIER_KEYS = ("Control_L", "Control_R", "Meta_L", "Meta_R") if sys.platform == "darwin" else ("Control_L", "Control_R")
 
 
 class TextEditorView(View):
@@ -20,6 +30,10 @@ class TextEditorView(View):
     Ctrl+1, Ctrl+2, Ctrl+0) set it for the cursor's line or every selected line, and typing never changes
     it. Enter at the end of a heading starts a paragraph. Bold and Highlight (Ctrl+B, Ctrl+H) toggle a format
     on the selection. Typed text is bold or highlighted only when the text on both sides of it is.
+
+    Web links in the text are underlined in the theme's link colour as they are typed. Ctrl+click (Cmd+click on
+    macOS) opens one in the browser; the pointer turns into a hand over a link while Ctrl is held. A plain click
+    puts the cursor in the link, for editing it.
     """
 
     def __init__(self, parent: tk.Misc, theme: Theme, view_id: str = TEXT_EDITOR_VIEW_ID) -> None:
@@ -92,11 +106,44 @@ class TextEditorView(View):
         # These replace tk.Text's own Ctrl+B (cursor left) and Ctrl+H (BackSpace).
         ShortcutMap.bind_local(text, ShortcutMap.BOLD, lambda: self.toggle_format(InlineFormat.BOLD))
         ShortcutMap.bind_local(text, ShortcutMap.HIGHLIGHT, lambda: self.toggle_format(InlineFormat.HIGHLIGHTED))
+        for sequence in LINK_CLICK_SEQUENCES:
+            text.bind(sequence, self._on_link_click)
+        text.bind("<Motion>", lambda event: self._update_pointer(event.x, event.y, event.state & LINK_CLICK_MASK))
+        text.bind("<Leave>", lambda _event: self._set_pointer(TEXT_CURSOR))
+        for key in LINK_MODIFIER_KEYS:
+            text.bind(f"<KeyPress-{key}>", lambda _event: self._update_pointer_at_mouse(True), add="+")
+            text.bind(f"<KeyRelease-{key}>", lambda _event: self._update_pointer_at_mouse(False), add="+")
+
+    def _on_link_click(self, event: tk.Event) -> str | None:
+        """Opens the link under the pointer in the browser. Off a link, Tk's own Ctrl+click runs."""
+        url = self._adapter.link_at(f"@{event.x},{event.y}")
+        if url is None:
+            return None
+        webbrowser.open(url)
+        return "break"
+
+    def _update_pointer(self, x: int, y: int, modifier_held: bool) -> None:
+        """A hand over a link while the link modifier is held, so it's clear a click will open it."""
+        over_link = modifier_held and self._adapter.link_at(f"@{x},{y}") is not None
+        self._set_pointer(LINK_CURSOR if over_link else TEXT_CURSOR)
+
+    def _set_pointer(self, cursor: str) -> None:
+        """Changes the mouse pointer only when it differs: any configure() makes tk.Text redraw all of its
+        text and restart the cursor's blink, which flickers when done on every mouse move."""
+        if self._text.cget("cursor") != cursor:
+            self._text.configure(cursor=cursor)
+
+    def _update_pointer_at_mouse(self, modifier_held: bool) -> None:
+        text = self._text
+        x, y = text.winfo_pointerx() - text.winfo_rootx(), text.winfo_pointery() - text.winfo_rooty()
+        if 0 <= x < text.winfo_width() and 0 <= y < text.winfo_height():
+            self._update_pointer(x, y, modifier_held)
 
     def _on_modified(self, _event: tk.Event) -> None:
         if not self._text.edit_modified():
             return  # the event also fires when the flag is cleared below
         self._adapter.normalize_blocks()
+        self._adapter.mark_links()
         self._text.edit_modified(False)
 
     def _on_return(self, _event: tk.Event) -> str | None:

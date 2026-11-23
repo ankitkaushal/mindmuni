@@ -135,7 +135,7 @@ A run of text that has the same inline formatting.
 ### `ThemePalette`
 `background`, `foreground`, `canvas_background`, `connector_line`,
 `selection_outline`, `highlight_background`, `menu_background`,
-`menu_foreground`, `node_colors: dict[NodeColor, str]`
+`menu_foreground`, `link_foreground` (links in notes), `node_colors: dict[NodeColor, str]`
 
 ### `FontSettings`
 `family`, `base_size`, `heading_1_size`, `heading_2_size`, `node_title_size`
@@ -245,6 +245,7 @@ whose `node_id` is not in the map are ignored.
     "highlight_background": "#665c00",
     "menu_background": "#2d2d2d",
     "menu_foreground": "#e0e0e0",
+    "link_foreground": "#64b5f6",
     "node_colors": {
       "RED": "#e57373", "ORANGE": "#ffb74d", "AMBER": "#ffd54f", "YELLOW": "#fff176",
       "LIME": "#dce775", "GREEN": "#81c784", "TEAL": "#4db6ac", "CYAN": "#4dd0e1",
