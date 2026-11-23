@@ -1,3 +1,4 @@
+import sys
 import tkinter as tk
 from collections.abc import Callable
 
@@ -9,7 +10,8 @@ from mindmuni.utils.color_utils import contrast_text_color
 INSERT_CURSOR_WIDTH = 2
 CONTROL_MASK = 0x0004
 SHIFT_MASK = 0x0001
-ALT_MASK = 0x0008
+# Tk's Alt bit differs per platform. On Windows 0x0008 means Num Lock (Alt is 0x20000); on macOS Option is 0x0010.
+ALT_MASK = {"win32": 0x20000, "darwin": 0x0010}.get(sys.platform, 0x0008)
 
 TitleCommitHandler = Callable[[str, str], None]  # (node_id, new_title)
 EditingChangedHandler = Callable[[bool], None]  # (is_editing)
